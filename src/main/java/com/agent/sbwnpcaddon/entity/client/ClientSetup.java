@@ -1,6 +1,7 @@
 package com.agent.sbwnpcaddon.entity.client;
 
 import com.agent.sbwnpcaddon.entity.EntityRegistry;
+import com.agent.sbwnpcaddon.entity.client.IvNpcRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -98,5 +99,19 @@ public class ClientSetup {
         event.registerEntityRenderer(EntityRegistry.WHEEL_CHAIR.get(), ctx -> new SbwNpcRenderer(ctx, "wheel_chair"));
         event.registerEntityRenderer(EntityRegistry.YX_100.get(), ctx -> new SbwNpcRenderer(ctx, "yx_100"));
         event.registerEntityRenderer(EntityRegistry.ZTZ_99A.get(), ctx -> new SbwNpcRenderer(ctx, "ztz_99a"));
+        event.registerEntityRenderer(EntityRegistry.CHARGER.get(), ctx -> new IvNpcRenderer(ctx, "charger"));
+        event.registerEntityRenderer(EntityRegistry.CUSTOMBENCH.get(), ctx -> new IvNpcRenderer(ctx, "custombench"));
+        event.registerEntityRenderer(EntityRegistry.DECORBENCH.get(), ctx -> new IvNpcRenderer(ctx, "decorbench"));
+        event.registerEntityRenderer(EntityRegistry.ENGINEBENCH.get(), ctx -> new IvNpcRenderer(ctx, "enginebench"));
+        event.registerEntityRenderer(EntityRegistry.FUELPUMP.get(), ctx -> new IvNpcRenderer(ctx, "fuelpump"));
+        event.registerEntityRenderer(EntityRegistry.GUNBENCH.get(), ctx -> new IvNpcRenderer(ctx, "gunbench"));
+        event.registerEntityRenderer(EntityRegistry.INSTRUMENTBENCH.get(), ctx -> new IvNpcRenderer(ctx, "instrumentbench"));
+        event.registerEntityRenderer(EntityRegistry.INVISIBLE.get(), ctx -> new IvNpcRenderer(ctx, "invisible"));
+        event.registerEntityRenderer(EntityRegistry.ITEMBENCH.get(), ctx -> new IvNpcRenderer(ctx, "itembench"));
+        event.registerEntityRenderer(EntityRegistry.JERRYCAN.get(), ctx -> new IvNpcRenderer(ctx, "jerrycan"));
+        event.registerEntityRenderer(EntityRegistry.PROPELLERBENCH.get(), ctx -> new IvNpcRenderer(ctx, "propellerbench"));
+        event.registerEntityRenderer(EntityRegistry.SEATBENCH.get(), ctx -> new IvNpcRenderer(ctx, "seatbench"));
+        event.registerEntityRenderer(EntityRegistry.VEHICLEBENCH.get(), ctx -> new IvNpcRenderer(ctx, "vehiclebench"));
+        event.registerEntityRenderer(EntityRegistry.WHEELBENCH.get(), ctx -> new IvNpcRenderer(ctx, "wheelbench"));
     }
 }

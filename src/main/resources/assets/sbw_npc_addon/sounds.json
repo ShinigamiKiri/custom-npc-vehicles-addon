@@ -22,5 +22,17 @@
     "sounds": [
       "sbw_npc_addon:bullet_impact/bullet_impact_01"
     ]
+  },
+  "vehicle_engine_idle": {
+    "category": "player",
+    "sounds": [
+      "sbw_npc_addon:vehicle/vehicle_engine_idle"
+    ]
+  },
+  "vehicle_horn": {
+    "category": "player",
+    "sounds": [
+      "sbw_npc_addon:vehicle/vehicle_horn"
+    ]
   }
 }

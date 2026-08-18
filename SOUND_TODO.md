@@ -20,6 +20,14 @@ Please drop your sound files into the respective directories listed below. The e
    - File Path: `src/main/resources/assets/sbw_npc_addon/sounds/bullet_impact/bullet_impact_01.ogg`
    - Description: The sound of a bullet striking a surface or dirt.
 
+5. **Vehicle Engine Idle**
+   - File Path: `src/main/resources/assets/sbw_npc_addon/sounds/vehicle/vehicle_engine_idle.ogg`
+   - Description: The sound of a vehicle engine idling.
+
+6. **Vehicle Horn**
+   - File Path: `src/main/resources/assets/sbw_npc_addon/sounds/vehicle/vehicle_horn.ogg`
+   - Description: A vehicle horn honking.
+
 ### Where to find sounds
 You can source free, high-quality audio files from:
 - [Freesound](https://freesound.org/)

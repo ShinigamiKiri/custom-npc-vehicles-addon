@@ -6,6 +6,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import com.agent.sbwnpcaddon.entity.IvNpcEntity;
 
 public class EntityRegistry {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, "sbw_npc_addon");
@@ -99,6 +100,20 @@ public class EntityRegistry {
     public static final RegistryObject<EntityType<SbwNpcEntity>> YX_100 = ENTITIES.register("yx_100", () -> EntityType.Builder.<SbwNpcEntity>of((type, level) -> new SbwNpcEntity(type, level, "yx_100"), MobCategory.MISC).sized(1.0f, 1.0f).build("yx_100"));
     public static final RegistryObject<EntityType<SbwNpcEntity>> ZTZ_99A = ENTITIES.register("ztz_99a", () -> EntityType.Builder.<SbwNpcEntity>of((type, level) -> new SbwNpcEntity(type, level, "ztz_99a"), MobCategory.MISC).sized(1.0f, 1.0f).build("ztz_99a"));
 
+    public static final RegistryObject<EntityType<IvNpcEntity>> CHARGER = ENTITIES.register("charger", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "charger"), MobCategory.MISC).sized(1.0f, 1.0f).build("charger"));
+    public static final RegistryObject<EntityType<IvNpcEntity>> CUSTOMBENCH = ENTITIES.register("custombench", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "custombench"), MobCategory.MISC).sized(1.0f, 1.0f).build("custombench"));
+    public static final RegistryObject<EntityType<IvNpcEntity>> DECORBENCH = ENTITIES.register("decorbench", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "decorbench"), MobCategory.MISC).sized(1.0f, 1.0f).build("decorbench"));
+    public static final RegistryObject<EntityType<IvNpcEntity>> ENGINEBENCH = ENTITIES.register("enginebench", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "enginebench"), MobCategory.MISC).sized(1.0f, 1.0f).build("enginebench"));
+    public static final RegistryObject<EntityType<IvNpcEntity>> FUELPUMP = ENTITIES.register("fuelpump", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "fuelpump"), MobCategory.MISC).sized(1.0f, 1.0f).build("fuelpump"));
+    public static final RegistryObject<EntityType<IvNpcEntity>> GUNBENCH = ENTITIES.register("gunbench", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "gunbench"), MobCategory.MISC).sized(1.0f, 1.0f).build("gunbench"));
+    public static final RegistryObject<EntityType<IvNpcEntity>> INSTRUMENTBENCH = ENTITIES.register("instrumentbench", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "instrumentbench"), MobCategory.MISC).sized(1.0f, 1.0f).build("instrumentbench"));
+    public static final RegistryObject<EntityType<IvNpcEntity>> INVISIBLE = ENTITIES.register("invisible", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "invisible"), MobCategory.MISC).sized(1.0f, 1.0f).build("invisible"));
+    public static final RegistryObject<EntityType<IvNpcEntity>> ITEMBENCH = ENTITIES.register("itembench", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "itembench"), MobCategory.MISC).sized(1.0f, 1.0f).build("itembench"));
+    public static final RegistryObject<EntityType<IvNpcEntity>> JERRYCAN = ENTITIES.register("jerrycan", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "jerrycan"), MobCategory.MISC).sized(1.0f, 1.0f).build("jerrycan"));
+    public static final RegistryObject<EntityType<IvNpcEntity>> PROPELLERBENCH = ENTITIES.register("propellerbench", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "propellerbench"), MobCategory.MISC).sized(1.0f, 1.0f).build("propellerbench"));
+    public static final RegistryObject<EntityType<IvNpcEntity>> SEATBENCH = ENTITIES.register("seatbench", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "seatbench"), MobCategory.MISC).sized(1.0f, 1.0f).build("seatbench"));
+    public static final RegistryObject<EntityType<IvNpcEntity>> VEHICLEBENCH = ENTITIES.register("vehiclebench", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "vehiclebench"), MobCategory.MISC).sized(1.0f, 1.0f).build("vehiclebench"));
+    public static final RegistryObject<EntityType<IvNpcEntity>> WHEELBENCH = ENTITIES.register("wheelbench", () -> EntityType.Builder.<IvNpcEntity>of((type, level) -> new IvNpcEntity(type, level, "wheelbench"), MobCategory.MISC).sized(1.0f, 1.0f).build("wheelbench"));
     public static void register(IEventBus eventBus) {
         ENTITIES.register(eventBus);
     }
