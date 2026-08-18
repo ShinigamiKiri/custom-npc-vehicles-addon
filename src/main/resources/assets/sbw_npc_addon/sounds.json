@@ -1,0 +1,26 @@
+{
+  "rifle_shot_01": {
+    "category": "player",
+    "sounds": [
+      "sbw_npc_addon:gunfire/rifle_shot_01"
+    ]
+  },
+  "cannon_fire_01": {
+    "category": "player",
+    "sounds": [
+      "sbw_npc_addon:cannon/cannon_fire_01"
+    ]
+  },
+  "bullet_flyby_01": {
+    "category": "player",
+    "sounds": [
+      "sbw_npc_addon:bullet_flyby/bullet_flyby_01"
+    ]
+  },
+  "bullet_impact_01": {
+    "category": "player",
+    "sounds": [
+      "sbw_npc_addon:bullet_impact/bullet_impact_01"
+    ]
+  }
+}

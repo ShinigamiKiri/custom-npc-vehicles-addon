@@ -1,0 +1,21 @@
+# Forge / Gradle / Java
+.gradle/
+build/
+run/
+out/
+*.class
+
+# IDEs
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+bin/
+.classpath
+.project
+
+# Do not ignore libs directory since we need the local dependencies
+!libs/
+!libs/*.jar
