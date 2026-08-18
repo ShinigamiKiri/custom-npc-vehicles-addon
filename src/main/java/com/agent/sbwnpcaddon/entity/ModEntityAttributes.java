@@ -13,7 +13,9 @@ public class ModEntityAttributes {
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         EntityRegistry.ENTITIES.getEntries().forEach(entityTypeRegistryObject -> {
-            event.put((EntityType<? extends PathfinderMob>) entityTypeRegistryObject.get(), SbwNpcEntity.createAttributes().build());
+            if (!entityTypeRegistryObject.getId().getPath().startsWith("iv_")) {
+                event.put((EntityType<? extends PathfinderMob>) entityTypeRegistryObject.get(), SbwNpcEntity.createAttributes().build());
+            }
         });
         event.put(EntityRegistry.CHARGER.get(), IvNpcEntity.createAttributes().build());
         event.put(EntityRegistry.CUSTOMBENCH.get(), IvNpcEntity.createAttributes().build());

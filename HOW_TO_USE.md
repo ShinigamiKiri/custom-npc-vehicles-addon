@@ -142,20 +142,20 @@ Here are all 101 custom entity IDs added by this mod. Use these exactly as writt
 - `ztz_99a`
 
 **Immersive Vehicles Models (.obj):**
-- `charger`
-- `custombench`
-- `decorbench`
-- `enginebench`
-- `fuelpump`
-- `gunbench`
-- `instrumentbench`
-- `invisible`
-- `itembench`
-- `jerrycan`
-- `propellerbench`
-- `seatbench`
-- `vehiclebench`
-- `wheelbench`
+- `iv_charger`
+- `iv_custombench`
+- `iv_decorbench`
+- `iv_enginebench`
+- `iv_fuelpump`
+- `iv_gunbench`
+- `iv_instrumentbench`
+- `iv_invisible`
+- `iv_itembench`
+- `iv_jerrycan`
+- `iv_propellerbench`
+- `iv_seatbench`
+- `iv_vehiclebench`
+- `iv_wheelbench`
 
 ---
 
