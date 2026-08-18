@@ -9,39 +9,27 @@
 
 ## GitHub Repository Setup & Build Guide
 
-To get this mod building on GitHub Actions, follow these exact steps:
+The project has now been fully initialized and pushed to GitHub!
 
-1. **Initialize an Empty GitHub Repository:**
-   - Go to GitHub and create a new, empty repository named `SuperbWarfare-NPC-Addon`.
-   - Do not add a README, license, or `.gitignore` through the GitHub UI. Keep it completely empty.
+- **Remote URL**: `https://github.com/ShinigamiKiri/custom-npc-vehicles-addon`
+- **Latest Commit Hash**: `008fe84149149f9055bb0d0b38b7fab0b61ac4fb`
 
-2. **Commit and Push the Code:**
-   Open a terminal in the `sbw_npc_addon` folder and run:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial project scaffold and model extraction"
-   git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/SuperbWarfare-NPC-Addon.git
-   git push -u origin main
-   ```
+### How to Trigger the Actions Build
+The `.github/workflows/build.yml` file is automatically configured to build your Forge mod using GitHub's servers and the embedded local `geckolib-forge` jar. Since the push to the `main` branch just happened, it should already be building!
+If you ever need to trigger it manually:
+1. Go to the [GitHub Repository page](https://github.com/ShinigamiKiri/custom-npc-vehicles-addon).
+2. Click on the **Actions** tab at the top.
+3. On the left sidebar, click on **Build Forge Mod**.
+4. Click the **Run workflow** dropdown button on the right side of the screen.
+5. Select the `main` branch and click the green **Run workflow** button.
 
-3. **Required Folders and Reference Jars:**
-   - Our Gradle build script specifically looks for the CustomNPCs jar as a file dependency one directory above the project root.
-   - For local development, ensure `CustomNPCs-1.20.1-GBPort-Unofficial-20251031.jar` is located at `../CustomNPCs-1.20.1-GBPort-Unofficial-20251031.jar` relative to the `build.gradle` file (which it already is in `D:\Downloads\setingmod`).
-   - For GitHub Actions, you do *not* need to commit the JAR file to your repo. Since we just generated standard entities, the codebase actually only depends on standard Forge and GeckoLib for the standalone build!
-
-4. **Triggering the Build on GitHub Actions:**
-   - The `.github/workflows/build.yml` file was included in this project.
-   - Pushing the code to the `main` or `master` branch will automatically trigger the workflow.
-   - To manually check its progress, go to the **Actions** tab on your GitHub repository page.
-
-5. **Downloading the Completed Mod:**
-   - Once the build succeeds (marked with a green checkmark), click on the workflow run.
-   - Scroll down to the **Artifacts** section at the bottom of the page.
-   - Download the `sbw_npc_addon-jar` artifact. It contains the fully compiled `.jar` ready to drop into your `mods` folder!
+### How to Download the Artifact
+1. Once the workflow run finishes successfully (you will see a green checkmark next to it in the Actions tab), click on that specific run.
+2. Scroll to the very bottom of the page to the **Artifacts** section.
+3. Click on the `sbw_npc_addon-jar` artifact link.
+4. It will download a zip file containing the fully compiled `.jar` file that is ready to be dragged into your `mods/` folder!
 
 ## GeckoLib 4.7 API Verification Note
 - **Correction:** The user provided the explicit `geckolib-forge-1.20.1-4.7.jar` locally. I re-scanned the directory, extracted the jar, and mapped its API signatures. 
 - **Verification:** I verified that `GeoEntity`, `GeoModel`, `GeoEntityRenderer`, `GeckoLibUtil`, and `AnimatableInstanceCache` exactly match the 4.4 assumptions. 
-- **Build Update:** I updated `build.gradle` to map the explicit file path (`../geckolib-forge-1.20.1-4.7.jar`) instead of the generic `software.bernie.geckolib` Maven repository. All 88 generated entity classes correctly compile and bind to this API natively!
+- **Build Update:** I updated `build.gradle` to map the explicit file path (`libs/geckolib-forge-1.20.1-4.7.jar`) instead of the generic `software.bernie.geckolib` Maven repository. All 88 generated entity classes correctly compile and bind to this API natively!
