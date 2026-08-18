@@ -10,7 +10,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
@@ -36,7 +35,7 @@ public class IvNpcRenderer extends EntityRenderer<IvNpcEntity> {
         poseStack.pushPose();
         
         // Apply smooth quaternion physics if available
-        poseStack.mulPose(net.minecraft.client.renderer.entity.EntityRenderDispatcher.cameraOrientation()); // Example transform
+        poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation()); // Example transform
         
         ResourceLocation texture = getTextureLocation(entity);
         VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.entityCutoutNoCull(texture));
