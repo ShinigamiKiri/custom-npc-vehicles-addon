@@ -2,10 +2,11 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7.+'
 }
 
 group = 'com.agent.sbwnpcaddon'
-version = '1.1.0'
+version = '1.2.0'
 
 base {
     archivesName = 'sbw_npc_addon'
@@ -24,6 +25,9 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', 'sbw_npc_addon'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapPointingTo', 'sbw_npc_addon.refmap.json'
+            arg "-mixin.config=sbw_npc_addon.mixins.json"
             mods {
                 sbw_npc_addon {
                     source sourceSets.main
@@ -36,6 +40,9 @@ minecraft {
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', 'sbw_npc_addon'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapPointingTo', 'sbw_npc_addon.refmap.json'
+            arg "-mixin.config=sbw_npc_addon.mixins.json"
             mods {
                 sbw_npc_addon {
                     source sourceSets.main
@@ -58,6 +65,12 @@ dependencies {
     // If CustomNPCs has a Maven, we'd add it here. Since it's a jar file we downloaded,
     // we can add it as a file dependency if needed.
     implementation fg.deobf(files("libs/CustomNPCs-1.20.1-GBPort-Unofficial-20251031.jar"))
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+mixin {
+    add sourceSets.main, "sbw_npc_addon.refmap.json"
+    config "sbw_npc_addon.mixins.json"
 }
 
 tasks.named('processResources', ProcessResources).configure {

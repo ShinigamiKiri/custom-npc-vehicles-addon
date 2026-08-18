@@ -11,6 +11,6 @@ public class SbwNpcRenderer extends GeoEntityRenderer<SbwNpcEntity> {
 
     @Override
     public net.minecraft.client.renderer.RenderType getRenderType(SbwNpcEntity animatable, net.minecraft.resources.ResourceLocation texture, net.minecraft.client.renderer.MultiBufferSource bufferSource, float partialTick) {
-        return net.minecraft.client.renderer.RenderType.entityCutoutNoCull(texture);
+        return net.minecraft.client.renderer.RenderType.entityTranslucent(texture);
     }
 }

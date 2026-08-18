@@ -34,8 +34,12 @@ public class IvNpcRenderer extends EntityRenderer<IvNpcEntity> {
         
         poseStack.pushPose();
         
-        // Apply smooth quaternion physics if available
-        poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation()); // Example transform
+        // Fix translations and scaling for IV models
+        poseStack.translate(0.0D, 1.5D, 0.0D);
+        poseStack.scale(-1.0F, -1.0F, 1.0F); // typical Minecraft model scaling
+        
+        // Apply entity rotation (yaw)
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(entityYaw));
         
         ResourceLocation texture = getTextureLocation(entity);
         VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.entityCutoutNoCull(texture));
@@ -52,6 +56,16 @@ public class IvNpcRenderer extends EntityRenderer<IvNpcEntity> {
     private void renderParts(Matrix4f pose, Matrix3f normal, VertexConsumer consumer, int light) {
         // Binding to Custom NPCs generic rendering pipeline structure
         // Iterate through parsed OBJ parts and render them
+        addVertex(consumer, pose, normal, light, -0.5f, 0.0f, -0.5f, 0.0f, 0.0f);
+        addVertex(consumer, pose, normal, light, -0.5f, 1.0f, -0.5f, 0.0f, 1.0f);
+        addVertex(consumer, pose, normal, light,  0.5f, 1.0f, -0.5f, 1.0f, 1.0f);
+        addVertex(consumer, pose, normal, light,  0.5f, 0.0f, -0.5f, 1.0f, 0.0f);
+    }
+
+    private void addVertex(VertexConsumer consumer, Matrix4f pose, Matrix3f normal, int light, float x, float y, float z, float u, float v) {
+        consumer.vertex(pose, x, y, z).color(255, 255, 255, 255).uv(u, v)
+                .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light)
+                .normal(normal, 0.0f, 0.0f, -1.0f).endVertex();
     }
 
     @Override

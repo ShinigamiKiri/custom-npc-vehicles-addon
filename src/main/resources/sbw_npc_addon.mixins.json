@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.agent.sbwnpcaddon.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "sbw_npc_addon.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+    "GuiNpcAIMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
