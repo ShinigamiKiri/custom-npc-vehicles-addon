@@ -5,6 +5,8 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.EntityDimensions;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -34,14 +36,26 @@ public class SbwNpcEntity extends PathfinderMob implements GeoEntity {
     }
 
     @Override
+    public double getPassengersRidingOffset() {
+        if (this.getPersistentData().contains("SbwSeatOffset")) {
+            return this.getPersistentData().getDouble("SbwSeatOffset");
+        }
+        // For vehicles (especially jets/tanks), 0.45x height usually puts the player in the cockpit/seat
+        // rather than floating on the roof (0.75x). 
+        return (double)this.getDimensions(this.getPose()).height * 0.45D;
+    }
+
+    @Override
+    protected float getEyeHeight(Pose pose, EntityDimensions dimensions) {
+        return dimensions.height * 0.85F;
+    }
+
+    @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         controllers.add(new AnimationController<>(this, "controller", 0, this::predicate));
     }
 
     private <E extends GeoEntity> PlayState predicate(AnimationState<E> event) {
-        // Here we could add idle/walk animations if they exist in the json
-        // event.getController().setAnimation(RawAnimation.begin().thenLoop("animation.idle"));
-        // return PlayState.CONTINUE;
         return PlayState.STOP;
     }
 
