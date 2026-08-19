@@ -4,6 +4,9 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.entity.ai.control.LookControl;
+import net.minecraft.util.Mth;
 
 public class SbwPhysicsModule {
     private final Mob entity;
@@ -16,20 +19,36 @@ public class SbwPhysicsModule {
     private double currentSpeed = 0.0;
     private Vec3 velocity = Vec3.ZERO;
     
+    // Custom intents from our hijacked AI, so vanilla travel() doesn't see them
+    private float forwardIntent = 0.0f;
+    private float sideIntent = 0.0f;
+    
     public SbwPhysicsModule(Mob entity) {
         this.entity = entity;
         this.hullYaw = entity.getYRot();
+        
+        entity.moveControl = new VehicleMoveControl(entity, this);
+        entity.lookControl = new VehicleLookControl(entity);
     }
     
     public void tick() {
+        if (!(entity.getMoveControl() instanceof VehicleMoveControl)) {
+            entity.moveControl = new VehicleMoveControl(entity, this);
+        }
+        if (!(entity.getLookControl() instanceof VehicleLookControl)) {
+            entity.lookControl = new VehicleLookControl(entity);
+        }
+
         int type = entity.getPersistentData().getInt("SbwVehicleType");
-        float maxSpeed = entity.getPersistentData().contains("SbwMaxSpeed") ? entity.getPersistentData().getFloat("SbwMaxSpeed") : 1.5f;
-        float acceleration = entity.getPersistentData().contains("SbwAcceleration") ? entity.getPersistentData().getFloat("SbwAcceleration") : 0.02f;
-        float braking = entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.05f;
-        float turnRadius = entity.getPersistentData().contains("SbwTurnRadius") ? entity.getPersistentData().getFloat("SbwTurnRadius") : 2.0f;
         
-        float forwardInput = entity.zza; // forward/backward
-        float sideInput = entity.xxa; // left/right
+        float maxSpeed = entity.getPersistentData().contains("SbwMaxSpeed") ? entity.getPersistentData().getFloat("SbwMaxSpeed") : 0.5f;
+        float acceleration = entity.getPersistentData().contains("SbwAcceleration") ? entity.getPersistentData().getFloat("SbwAcceleration") : 0.005f;
+        float braking = entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.02f;
+        float turnRadius = entity.getPersistentData().contains("SbwTurnRadius") ? entity.getPersistentData().getFloat("SbwTurnRadius") : 1.0f;
+        
+        // Read from hijacked intent, not vanilla variables!
+        float forwardInput = this.forwardIntent;
+        float sideInput = this.sideIntent;
         
         if (type == 0 || type == 1) { // Ground or Boat
             if (forwardInput > 0) {
@@ -38,32 +57,29 @@ public class SbwPhysicsModule {
                 currentSpeed -= braking;
                 if (currentSpeed < -maxSpeed / 2) currentSpeed = -maxSpeed / 2;
             } else {
-                currentSpeed *= 0.95; // coast to stop
+                currentSpeed *= 0.90; 
                 if (currentSpeed < 0.01 && currentSpeed > -0.01) currentSpeed = 0;
             }
             
-            // Turning physics: only turn if moving!
             if (Math.abs(currentSpeed) > 0.05) {
-                // Turn rate inversely proportional to speed, but capped
-                float effectiveTurnRadius = (float) Math.max(0.5, Math.abs(currentSpeed) * turnRadius);
+                float effectiveTurnRadius = (float) Math.max(0.2, Math.abs(currentSpeed) * turnRadius);
                 float turnRate = turnRadius / effectiveTurnRadius;
                 
                 if (sideInput > 0) {
-                    hullYaw -= turnRate;
+                    hullYaw += turnRate; 
                 } else if (sideInput < 0) {
-                    hullYaw += turnRate;
+                    hullYaw -= turnRate;
                 }
             }
             
             float radYaw = (float) Math.toRadians(hullYaw);
             Vec3 forwardDir = new Vec3(-Math.sin(radYaw), 0, Math.cos(radYaw));
             
-            // Add gravity if not boat
             double ySpeed = entity.getDeltaMovement().y;
             if (type == 0 && !entity.onGround()) {
-                ySpeed -= 0.08; // gravity
+                ySpeed -= 0.08; 
             } else if (type == 1) {
-                ySpeed = 0; // boat floats
+                ySpeed = 0; 
             }
             
             velocity = new Vec3(forwardDir.x * currentSpeed, ySpeed, forwardDir.z * currentSpeed);
@@ -71,16 +87,17 @@ public class SbwPhysicsModule {
             
             entity.setYRot(hullYaw);
             entity.yBodyRot = hullYaw;
+            entity.yHeadRot = hullYaw;
             
         } else { // Plane or Heli
             float targetPitch = forwardInput * 30.0f;
-            float targetRoll = sideInput * 30.0f;
+            float targetRoll = sideInput * -30.0f; 
             
             pitch += (targetPitch - pitch) * 0.1f;
             roll += (targetRoll - roll) * 0.1f;
             
-            if (sideInput > 0) hullYaw -= turnRadius;
-            if (sideInput < 0) hullYaw += turnRadius;
+            if (sideInput > 0) hullYaw += turnRadius;
+            if (sideInput < 0) hullYaw -= turnRadius;
             
             rotation.identity()
                     .rotateY((float) Math.toRadians(hullYaw))
@@ -95,18 +112,18 @@ public class SbwPhysicsModule {
                 currentSpeed -= braking;
                 if (currentSpeed < 0) currentSpeed = 0;
             } else {
-                currentSpeed *= 0.98;
+                currentSpeed *= 0.95;
             }
             
             velocity = new Vec3(forwardVec.x, forwardVec.y, forwardVec.z).scale(currentSpeed);
             
-            if (type == 2) { // Plane
+            if (type == 2) { 
                 if (currentSpeed < maxSpeed * 0.3f) {
-                    velocity = velocity.add(0, -0.05, 0); // stall
+                    velocity = velocity.add(0, -0.05, 0); 
                 }
-            } else if (type == 3) { // Heli
+            } else if (type == 3) { 
                 if (forwardInput == 0 && currentSpeed < 0.1) {
-                    velocity = new Vec3(0, 0, 0); // hover
+                    velocity = new Vec3(0, 0, 0); 
                 }
             }
             
@@ -114,11 +131,72 @@ public class SbwPhysicsModule {
             
             entity.setYRot(hullYaw);
             entity.yBodyRot = hullYaw;
+            entity.yHeadRot = hullYaw;
             entity.setXRot(pitch);
         }
     }
 
     public Quaternionf getRotation() {
         return rotation;
+    }
+
+    private static class VehicleMoveControl extends MoveControl {
+        private final SbwPhysicsModule physics;
+
+        public VehicleMoveControl(Mob mob, SbwPhysicsModule physics) {
+            super(mob);
+            this.physics = physics;
+        }
+
+        @Override
+        public void tick() {
+            // ALWAYS force vanilla inputs to 0 so standard walking/teleporting never happens
+            this.mob.setZza(0.0F);
+            this.mob.setXxa(0.0F);
+            this.mob.setYya(0.0F);
+
+            if (this.operation == Operation.MOVE_TO) {
+                double dx = this.wantedX - this.mob.getX();
+                double dz = this.wantedZ - this.mob.getZ();
+                double distanceSq = dx * dx + dz * dz;
+
+                if (distanceSq < 4.0) {
+                    physics.forwardIntent = 0.0F;
+                    physics.sideIntent = 0.0F;
+                    return; 
+                }
+
+                float targetYaw = (float)(Mth.atan2(dz, dx) * (double)(180F / (float)Math.PI)) - 90.0F;
+                float yawDiff = Mth.wrapDegrees(targetYaw - this.mob.getYRot());
+
+                if (yawDiff > 5.0F) {
+                    physics.sideIntent = 1.0F;
+                } else if (yawDiff < -5.0F) {
+                    physics.sideIntent = -1.0F;
+                } else {
+                    physics.sideIntent = 0.0F;
+                }
+
+                if (Math.abs(yawDiff) > 60.0F) {
+                    physics.forwardIntent = 0.3F; 
+                } else {
+                    physics.forwardIntent = 1.0F; 
+                }
+            } else {
+                physics.forwardIntent = 0.0F;
+                physics.sideIntent = 0.0F;
+            }
+        }
+    }
+
+    private static class VehicleLookControl extends LookControl {
+        public VehicleLookControl(Mob mob) {
+            super(mob);
+        }
+
+        @Override
+        public void tick() {
+            // Do absolutely nothing
+        }
     }
 }
