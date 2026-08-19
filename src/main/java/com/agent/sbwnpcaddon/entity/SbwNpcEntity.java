@@ -5,8 +5,6 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.EntityDimensions;
 import software.bernie.geckolib.animatable.GeoEntity;
 import software.bernie.geckolib.core.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.core.animation.AnimatableManager;
@@ -15,6 +13,8 @@ import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.core.animation.RawAnimation;
 import software.bernie.geckolib.core.object.PlayState;
 import software.bernie.geckolib.util.GeckoLibUtil;
+import com.agent.sbwnpcaddon.entity.physics.VehicleMoveControl;
+import com.agent.sbwnpcaddon.entity.physics.VehicleLookControl;
 
 public class SbwNpcEntity extends PathfinderMob implements GeoEntity {
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
@@ -23,6 +23,9 @@ public class SbwNpcEntity extends PathfinderMob implements GeoEntity {
     public SbwNpcEntity(EntityType<? extends PathfinderMob> entityType, Level level, String modelName) {
         super(entityType, level);
         this.modelName = modelName;
+        // Permanently bind vehicle physics AI controls
+        this.moveControl = new VehicleMoveControl(this);
+        this.lookControl = new VehicleLookControl(this);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -40,14 +43,7 @@ public class SbwNpcEntity extends PathfinderMob implements GeoEntity {
         if (this.getPersistentData().contains("SbwSeatOffset")) {
             return this.getPersistentData().getDouble("SbwSeatOffset");
         }
-        // For vehicles (especially jets/tanks), 0.45x height usually puts the player in the cockpit/seat
-        // rather than floating on the roof (0.75x). 
         return (double)this.getDimensions(this.getPose()).height * 0.45D;
-    }
-
-    @Override
-    protected float getEyeHeight(Pose pose, EntityDimensions dimensions) {
-        return dimensions.height * 0.85F;
     }
 
     @Override

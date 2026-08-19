@@ -4,9 +4,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import net.minecraft.world.entity.ai.control.MoveControl;
-import net.minecraft.world.entity.ai.control.LookControl;
-import net.minecraft.util.Mth;
 
 public class SbwPhysicsModule {
     private final Mob entity;
@@ -19,26 +16,12 @@ public class SbwPhysicsModule {
     private double currentSpeed = 0.0;
     private Vec3 velocity = Vec3.ZERO;
     
-    // Custom intents from our hijacked AI, so vanilla travel() doesn't see them
-    private float forwardIntent = 0.0f;
-    private float sideIntent = 0.0f;
-    
     public SbwPhysicsModule(Mob entity) {
         this.entity = entity;
         this.hullYaw = entity.getYRot();
-        
-        entity.moveControl = new VehicleMoveControl(entity, this);
-        entity.lookControl = new VehicleLookControl(entity);
     }
     
     public void tick() {
-        if (!(entity.getMoveControl() instanceof VehicleMoveControl)) {
-            entity.moveControl = new VehicleMoveControl(entity, this);
-        }
-        if (!(entity.getLookControl() instanceof VehicleLookControl)) {
-            entity.lookControl = new VehicleLookControl(entity);
-        }
-
         int type = entity.getPersistentData().getInt("SbwVehicleType");
         
         float maxSpeed = entity.getPersistentData().contains("SbwMaxSpeed") ? entity.getPersistentData().getFloat("SbwMaxSpeed") : 0.5f;
@@ -46,9 +29,13 @@ public class SbwPhysicsModule {
         float braking = entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.02f;
         float turnRadius = entity.getPersistentData().contains("SbwTurnRadius") ? entity.getPersistentData().getFloat("SbwTurnRadius") : 1.0f;
         
-        // Read from hijacked intent, not vanilla variables!
-        float forwardInput = this.forwardIntent;
-        float sideInput = this.sideIntent;
+        float forwardInput = entity.zza; // forward/backward
+        float sideInput = entity.xxa; // left/right
+        
+        if (entity.getMoveControl() instanceof VehicleMoveControl vmc) {
+            forwardInput = vmc.forwardIntent;
+            sideInput = vmc.sideIntent;
+        }
         
         if (type == 0 || type == 1) { // Ground or Boat
             if (forwardInput > 0) {
@@ -138,65 +125,5 @@ public class SbwPhysicsModule {
 
     public Quaternionf getRotation() {
         return rotation;
-    }
-
-    private static class VehicleMoveControl extends MoveControl {
-        private final SbwPhysicsModule physics;
-
-        public VehicleMoveControl(Mob mob, SbwPhysicsModule physics) {
-            super(mob);
-            this.physics = physics;
-        }
-
-        @Override
-        public void tick() {
-            // ALWAYS force vanilla inputs to 0 so standard walking/teleporting never happens
-            this.mob.setZza(0.0F);
-            this.mob.setXxa(0.0F);
-            this.mob.setYya(0.0F);
-
-            if (this.operation == Operation.MOVE_TO) {
-                double dx = this.wantedX - this.mob.getX();
-                double dz = this.wantedZ - this.mob.getZ();
-                double distanceSq = dx * dx + dz * dz;
-
-                if (distanceSq < 4.0) {
-                    physics.forwardIntent = 0.0F;
-                    physics.sideIntent = 0.0F;
-                    return; 
-                }
-
-                float targetYaw = (float)(Mth.atan2(dz, dx) * (double)(180F / (float)Math.PI)) - 90.0F;
-                float yawDiff = Mth.wrapDegrees(targetYaw - this.mob.getYRot());
-
-                if (yawDiff > 5.0F) {
-                    physics.sideIntent = 1.0F;
-                } else if (yawDiff < -5.0F) {
-                    physics.sideIntent = -1.0F;
-                } else {
-                    physics.sideIntent = 0.0F;
-                }
-
-                if (Math.abs(yawDiff) > 60.0F) {
-                    physics.forwardIntent = 0.3F; 
-                } else {
-                    physics.forwardIntent = 1.0F; 
-                }
-            } else {
-                physics.forwardIntent = 0.0F;
-                physics.sideIntent = 0.0F;
-            }
-        }
-    }
-
-    private static class VehicleLookControl extends LookControl {
-        public VehicleLookControl(Mob mob) {
-            super(mob);
-        }
-
-        @Override
-        public void tick() {
-            // Do absolutely nothing
-        }
     }
 }
