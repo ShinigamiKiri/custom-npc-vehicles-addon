@@ -1,0 +1,15 @@
+
+## Using the Vehicle Config Tool
+To configure the physics and handling of your vehicles:
+1. Hold the **Vehicle Config Tool** (`sbw_npc_addon:vehicle_config_tool`) in your main hand.
+2. Right-click on any spawned vehicle/NPC entity to open the **Vehicle Configuration** GUI.
+
+### GUI Fields:
+- **Vehicle Type**: Cycles between Ground Vehicle, Boat, Plane, and Helicopter. This dictates the physics engine used (e.g., planes have stall mechanics and lift, boats ignore gravity, ground vehicles hug terrain).
+- **Max Speed**: The absolute top speed the vehicle can reach when fully accelerated.
+- **Accel Rate**: How quickly the vehicle speeds up per tick when moving forward.
+- **Brake Rate**: How quickly the vehicle slows down per tick when reversing/braking.
+- **Turn Radius**: Governs the turning circle. At high speeds, the effective turn rate is mathematically scaled down to simulate wide, realistic arcs. A higher turn radius means tighter/faster turns.
+- **Physics Toggle**: Enables or disables the custom movement engine entirely. If disabled, CustomNPCs handles movement natively.
+
+Click **Save/Apply** to persist these changes permanently into the entity's NBT data.

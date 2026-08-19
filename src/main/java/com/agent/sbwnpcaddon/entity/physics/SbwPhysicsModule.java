@@ -48,9 +48,10 @@ public class SbwPhysicsModule {
                 if (currentSpeed < 0.01 && currentSpeed > -0.01) currentSpeed = 0;
             }
             
-            if (Math.abs(currentSpeed) > 0.05) {
-                float effectiveTurnRadius = (float) Math.max(0.2, Math.abs(currentSpeed) * turnRadius);
-                float turnRate = turnRadius / effectiveTurnRadius;
+            float speedFactor = (float) Math.abs(currentSpeed);
+            if (speedFactor > 0.01) {
+                float maxTurnRate = Math.min(turnRadius, 5.0f);
+                float turnRate = maxTurnRate / (1.0f + speedFactor * 5.0f);
                 
                 if (sideInput > 0) {
                     hullYaw += turnRate; 
@@ -83,8 +84,15 @@ public class SbwPhysicsModule {
             pitch += (targetPitch - pitch) * 0.1f;
             roll += (targetRoll - roll) * 0.1f;
             
-            if (sideInput > 0) hullYaw += turnRadius;
-            if (sideInput < 0) hullYaw -= turnRadius;
+            float speedFactor = (float) Math.abs(currentSpeed);
+            // Heli (type 3) can turn while hovering. Planes (type 2) must move.
+            if (type == 3 || speedFactor > 0.01) {
+                float maxTurnRate = Math.min(turnRadius, 5.0f);
+                float turnRate = (type == 3) ? maxTurnRate : (maxTurnRate / (1.0f + speedFactor * 5.0f));
+                
+                if (sideInput > 0) hullYaw += turnRate;
+                if (sideInput < 0) hullYaw -= turnRate;
+            }
             
             rotation.identity()
                     .rotateY((float) Math.toRadians(hullYaw))

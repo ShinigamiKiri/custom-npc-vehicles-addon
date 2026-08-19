@@ -43,7 +43,9 @@ public class SbwNpcAddonMod {
 
     private void onEntityInteractSpecific(PlayerInteractEvent.EntityInteractSpecific event) {
         if (event.getItemStack().getItem() == ItemRegistry.VEHICLE_CONFIG_TOOL.get()) {
-            // We handle the actual screen opening in EntityInteract to avoid opening it twice
+            if (event.getLevel().isClientSide) {
+                net.minecraft.client.Minecraft.getInstance().setScreen(new com.agent.sbwnpcaddon.client.screen.VehicleConfigScreen((net.minecraft.world.entity.LivingEntity) event.getTarget()));
+            }
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
         }
