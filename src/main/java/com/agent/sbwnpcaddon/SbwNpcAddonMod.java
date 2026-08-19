@@ -21,6 +21,7 @@ public class SbwNpcAddonMod {
         ItemRegistry.register(modEventBus);
         
         MinecraftForge.EVENT_BUS.addListener(this::onLivingTick);
+        com.agent.sbwnpcaddon.network.SbwNetwork.register();
     }
     
     private void onLivingTick(LivingEvent.LivingTickEvent event) {
@@ -31,8 +32,7 @@ public class SbwNpcAddonMod {
                 VehicleConfigTool.physicsModules.put(event.getEntity(), module);
             }
             if (module != null) {
-                // Dummy values for testing, real input would be sent via packets
-                module.tickSteering(true, false, false, false); 
+                module.tick(); 
             }
         }
     }

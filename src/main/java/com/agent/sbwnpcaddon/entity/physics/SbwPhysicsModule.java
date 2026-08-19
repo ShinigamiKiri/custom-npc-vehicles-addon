@@ -8,77 +8,114 @@ import org.joml.Vector3f;
 public class SbwPhysicsModule {
     private final Mob entity;
     
-    // Rotation state
     private final Quaternionf rotation = new Quaternionf();
     private float hullYaw = 0.0f;
-    private float turretYaw = 0.0f;
     private float pitch = 0.0f;
     private float roll = 0.0f;
     
-    // Physics state
+    private double currentSpeed = 0.0;
     private Vec3 velocity = Vec3.ZERO;
-    private float acceleration = 0.02f;
-    private float maxSpeed = 1.5f;
-    private float turnSpeed = 2.0f;
     
     public SbwPhysicsModule(Mob entity) {
         this.entity = entity;
+        this.hullYaw = entity.getYRot();
     }
     
-    public void tickSteering(boolean forward, boolean backward, boolean left, boolean right) {
-        // Smooth vector-based steering to eliminate yaw snapping
-        if (left) {
-            hullYaw -= turnSpeed;
+    public void tick() {
+        int type = entity.getPersistentData().getInt("SbwVehicleType");
+        float maxSpeed = entity.getPersistentData().contains("SbwMaxSpeed") ? entity.getPersistentData().getFloat("SbwMaxSpeed") : 1.5f;
+        float acceleration = entity.getPersistentData().contains("SbwAcceleration") ? entity.getPersistentData().getFloat("SbwAcceleration") : 0.02f;
+        float braking = entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.05f;
+        float turnRadius = entity.getPersistentData().contains("SbwTurnRadius") ? entity.getPersistentData().getFloat("SbwTurnRadius") : 2.0f;
+        
+        float forwardInput = entity.zza; // forward/backward
+        float sideInput = entity.xxa; // left/right
+        
+        if (type == 0 || type == 1) { // Ground or Boat
+            if (forwardInput > 0) {
+                if (currentSpeed < maxSpeed) currentSpeed += acceleration;
+            } else if (forwardInput < 0) {
+                currentSpeed -= braking;
+                if (currentSpeed < -maxSpeed / 2) currentSpeed = -maxSpeed / 2;
+            } else {
+                currentSpeed *= 0.95; // coast to stop
+                if (currentSpeed < 0.01 && currentSpeed > -0.01) currentSpeed = 0;
+            }
+            
+            // Turning physics: only turn if moving!
+            if (Math.abs(currentSpeed) > 0.05) {
+                // Turn rate inversely proportional to speed, but capped
+                float effectiveTurnRadius = (float) Math.max(0.5, Math.abs(currentSpeed) * turnRadius);
+                float turnRate = turnRadius / effectiveTurnRadius;
+                
+                if (sideInput > 0) {
+                    hullYaw -= turnRate;
+                } else if (sideInput < 0) {
+                    hullYaw += turnRate;
+                }
+            }
+            
+            float radYaw = (float) Math.toRadians(hullYaw);
+            Vec3 forwardDir = new Vec3(-Math.sin(radYaw), 0, Math.cos(radYaw));
+            
+            // Add gravity if not boat
+            double ySpeed = entity.getDeltaMovement().y;
+            if (type == 0 && !entity.onGround()) {
+                ySpeed -= 0.08; // gravity
+            } else if (type == 1) {
+                ySpeed = 0; // boat floats
+            }
+            
+            velocity = new Vec3(forwardDir.x * currentSpeed, ySpeed, forwardDir.z * currentSpeed);
+            entity.setDeltaMovement(velocity);
+            
+            entity.setYRot(hullYaw);
+            entity.yBodyRot = hullYaw;
+            
+        } else { // Plane or Heli
+            float targetPitch = forwardInput * 30.0f;
+            float targetRoll = sideInput * 30.0f;
+            
+            pitch += (targetPitch - pitch) * 0.1f;
+            roll += (targetRoll - roll) * 0.1f;
+            
+            if (sideInput > 0) hullYaw -= turnRadius;
+            if (sideInput < 0) hullYaw += turnRadius;
+            
+            rotation.identity()
+                    .rotateY((float) Math.toRadians(hullYaw))
+                    .rotateX((float) Math.toRadians(pitch))
+                    .rotateZ((float) Math.toRadians(roll));
+            
+            Vector3f forwardVec = new Vector3f(0, 0, 1).rotate(rotation);
+            
+            if (forwardInput > 0 && currentSpeed < maxSpeed) {
+                currentSpeed += acceleration;
+            } else if (forwardInput < 0) {
+                currentSpeed -= braking;
+                if (currentSpeed < 0) currentSpeed = 0;
+            } else {
+                currentSpeed *= 0.98;
+            }
+            
+            velocity = new Vec3(forwardVec.x, forwardVec.y, forwardVec.z).scale(currentSpeed);
+            
+            if (type == 2) { // Plane
+                if (currentSpeed < maxSpeed * 0.3f) {
+                    velocity = velocity.add(0, -0.05, 0); // stall
+                }
+            } else if (type == 3) { // Heli
+                if (forwardInput == 0 && currentSpeed < 0.1) {
+                    velocity = new Vec3(0, 0, 0); // hover
+                }
+            }
+            
+            entity.setDeltaMovement(velocity);
+            
+            entity.setYRot(hullYaw);
+            entity.yBodyRot = hullYaw;
+            entity.setXRot(pitch);
         }
-        if (right) {
-            hullYaw += turnSpeed;
-        }
-        
-        float radYaw = (float) Math.toRadians(hullYaw);
-        Vec3 forwardDir = new Vec3(-Math.sin(radYaw), 0, Math.cos(radYaw));
-        
-        double speed = velocity.length();
-        if (forward && speed < maxSpeed) {
-            velocity = velocity.add(forwardDir.scale(acceleration));
-        } else if (backward) {
-            velocity = velocity.subtract(forwardDir.scale(acceleration));
-        }
-        
-        // Friction / Drag
-        velocity = velocity.scale(0.95);
-        entity.setDeltaMovement(velocity);
-        
-        // Apply smooth yaw back to entity for Custom NPCs API compatibility
-        entity.setYRot(hullYaw);
-        entity.yBodyRot = hullYaw;
-        entity.yHeadRot = turretYaw;
-    }
-    
-    public void tickFlight(float targetPitch, float targetYaw, float targetRoll) {
-        // 3-axis quaternion-based rotation system (pitch, yaw, roll)
-        pitch += (targetPitch - pitch) * 0.1f;
-        hullYaw += (targetYaw - hullYaw) * 0.1f;
-        roll += (targetRoll - roll) * 0.1f;
-        
-        rotation.identity()
-                .rotateY((float) Math.toRadians(hullYaw))
-                .rotateX((float) Math.toRadians(pitch))
-                .rotateZ((float) Math.toRadians(roll));
-        
-        // Update flight vector
-        Vector3f forwardVec = new Vector3f(0, 0, 1).rotate(rotation);
-        velocity = new Vec3(forwardVec.x, forwardVec.y, forwardVec.z).scale(maxSpeed);
-        entity.setDeltaMovement(velocity);
-    }
-    
-    public void updateTurret(float targetTurretYaw) {
-        // Independent rotating turret logic separate from hull
-        float diff = targetTurretYaw - turretYaw;
-        while (diff < -180.0F) diff += 360.0F;
-        while (diff >= 180.0F) diff -= 360.0F;
-        
-        turretYaw += diff * 0.15f; // Smooth turret tracking
-        entity.yHeadRot = turretYaw;
     }
 
     public Quaternionf getRotation() {
