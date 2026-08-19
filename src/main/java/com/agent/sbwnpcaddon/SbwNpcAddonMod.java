@@ -10,6 +10,10 @@ import com.agent.sbwnpcaddon.item.ItemRegistry;
 import com.agent.sbwnpcaddon.item.VehicleConfigTool;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.world.InteractionResult;
 
 @Mod("sbw_npc_addon")
 public class SbwNpcAddonMod {
@@ -21,7 +25,28 @@ public class SbwNpcAddonMod {
         ItemRegistry.register(modEventBus);
         
         MinecraftForge.EVENT_BUS.addListener(this::onLivingTick);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onEntityInteract);
+        MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onEntityInteractSpecific);
+        
         com.agent.sbwnpcaddon.network.SbwNetwork.register();
+    }
+    
+    private void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
+        if (event.getItemStack().getItem() == ItemRegistry.VEHICLE_CONFIG_TOOL.get()) {
+            if (event.getLevel().isClientSide) {
+                net.minecraft.client.Minecraft.getInstance().setScreen(new com.agent.sbwnpcaddon.client.screen.VehicleConfigScreen((net.minecraft.world.entity.LivingEntity) event.getTarget()));
+            }
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+        }
+    }
+
+    private void onEntityInteractSpecific(PlayerInteractEvent.EntityInteractSpecific event) {
+        if (event.getItemStack().getItem() == ItemRegistry.VEHICLE_CONFIG_TOOL.get()) {
+            // We handle the actual screen opening in EntityInteract to avoid opening it twice
+            event.setCanceled(true);
+            event.setCancellationResult(InteractionResult.SUCCESS);
+        }
     }
     
     private void onLivingTick(LivingEvent.LivingTickEvent event) {

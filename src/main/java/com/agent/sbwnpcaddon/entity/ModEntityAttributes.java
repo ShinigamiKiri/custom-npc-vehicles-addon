@@ -31,5 +31,16 @@ public class ModEntityAttributes {
         event.put(EntityRegistry.SEATBENCH.get(), IvNpcEntity.createAttributes().build());
         event.put(EntityRegistry.VEHICLEBENCH.get(), IvNpcEntity.createAttributes().build());
         event.put(EntityRegistry.WHEELBENCH.get(), IvNpcEntity.createAttributes().build());
+        event.put(EntityRegistry.IV_CHALLENGER1.get(), IvNpcEntity.createAttributes().build());
+        event.put(EntityRegistry.IV_F15C.get(), IvNpcEntity.createAttributes().build());
+        event.put(EntityRegistry.IV_F16C.get(), IvNpcEntity.createAttributes().build());
+        event.put(EntityRegistry.IV_F2A.get(), IvNpcEntity.createAttributes().build());
+        event.put(EntityRegistry.IV_F4B.get(), IvNpcEntity.createAttributes().build());
+        event.put(EntityRegistry.IV_F4E.get(), IvNpcEntity.createAttributes().build());
+        event.put(EntityRegistry.IV_LEOPARD1.get(), IvNpcEntity.createAttributes().build());
+        event.put(EntityRegistry.IV_LEOPARD2A5.get(), IvNpcEntity.createAttributes().build());
+        event.put(EntityRegistry.IV_MIG25PDS.get(), IvNpcEntity.createAttributes().build());
+        event.put(EntityRegistry.IV_MIG29.get(), IvNpcEntity.createAttributes().build());
+        event.put(EntityRegistry.IV_TYPHOON.get(), IvNpcEntity.createAttributes().build());
     }
 }

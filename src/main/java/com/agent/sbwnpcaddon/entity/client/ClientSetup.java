@@ -113,5 +113,16 @@ public class ClientSetup {
         event.registerEntityRenderer(EntityRegistry.SEATBENCH.get(), ctx -> new IvNpcRenderer(ctx, "seatbench"));
         event.registerEntityRenderer(EntityRegistry.VEHICLEBENCH.get(), ctx -> new IvNpcRenderer(ctx, "vehiclebench"));
         event.registerEntityRenderer(EntityRegistry.WHEELBENCH.get(), ctx -> new IvNpcRenderer(ctx, "wheelbench"));
+        event.registerEntityRenderer(EntityRegistry.IV_CHALLENGER1.get(), ctx -> new IvNpcRenderer(ctx, "challenger1"));
+        event.registerEntityRenderer(EntityRegistry.IV_F15C.get(), ctx -> new IvNpcRenderer(ctx, "f15c"));
+        event.registerEntityRenderer(EntityRegistry.IV_F16C.get(), ctx -> new IvNpcRenderer(ctx, "f16c"));
+        event.registerEntityRenderer(EntityRegistry.IV_F2A.get(), ctx -> new IvNpcRenderer(ctx, "f2a"));
+        event.registerEntityRenderer(EntityRegistry.IV_F4B.get(), ctx -> new IvNpcRenderer(ctx, "f4b"));
+        event.registerEntityRenderer(EntityRegistry.IV_F4E.get(), ctx -> new IvNpcRenderer(ctx, "f4e"));
+        event.registerEntityRenderer(EntityRegistry.IV_LEOPARD1.get(), ctx -> new IvNpcRenderer(ctx, "leopard1"));
+        event.registerEntityRenderer(EntityRegistry.IV_LEOPARD2A5.get(), ctx -> new IvNpcRenderer(ctx, "leopard2a5"));
+        event.registerEntityRenderer(EntityRegistry.IV_MIG25PDS.get(), ctx -> new IvNpcRenderer(ctx, "mig25pds"));
+        event.registerEntityRenderer(EntityRegistry.IV_MIG29.get(), ctx -> new IvNpcRenderer(ctx, "mig29"));
+        event.registerEntityRenderer(EntityRegistry.IV_TYPHOON.get(), ctx -> new IvNpcRenderer(ctx, "typhoon"));
     }
 }

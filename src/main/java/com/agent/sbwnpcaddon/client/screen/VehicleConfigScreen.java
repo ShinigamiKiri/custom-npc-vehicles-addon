@@ -29,21 +29,27 @@ public class VehicleConfigScreen extends Screen {
         float brk = entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.05f;
         float tr = entity.getPersistentData().contains("SbwTurnRadius") ? entity.getPersistentData().getFloat("SbwTurnRadius") : 2.0f;
         this.physicsEnabled = entity.getPersistentData().getBoolean("SbwPhysicsEnabled");
+    }
+
+    @Override
+    protected void init() {
+        super.init();
         
         maxSpeedBox = new EditBox(net.minecraft.client.Minecraft.getInstance().font, 0, 0, 100, 20, Component.empty());
         accelBox = new EditBox(net.minecraft.client.Minecraft.getInstance().font, 0, 0, 100, 20, Component.empty());
         brakeBox = new EditBox(net.minecraft.client.Minecraft.getInstance().font, 0, 0, 100, 20, Component.empty());
         turnRadBox = new EditBox(net.minecraft.client.Minecraft.getInstance().font, 0, 0, 100, 20, Component.empty());
         
+        float ms = entity.getPersistentData().contains("SbwMaxSpeed") ? entity.getPersistentData().getFloat("SbwMaxSpeed") : 1.5f;
+        float acc = entity.getPersistentData().contains("SbwAcceleration") ? entity.getPersistentData().getFloat("SbwAcceleration") : 0.02f;
+        float brk = entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.05f;
+        float tr = entity.getPersistentData().contains("SbwTurnRadius") ? entity.getPersistentData().getFloat("SbwTurnRadius") : 2.0f;
+        
         maxSpeedBox.setValue(String.valueOf(ms));
         accelBox.setValue(String.valueOf(acc));
         brakeBox.setValue(String.valueOf(brk));
         turnRadBox.setValue(String.valueOf(tr));
-    }
-
-    @Override
-    protected void init() {
-        super.init();
+        
         int cx = this.width / 2;
         int cy = this.height / 2;
         
@@ -69,24 +75,33 @@ public class VehicleConfigScreen extends Screen {
             b.setMessage(Component.literal("Physics: " + (physicsEnabled ? "ON" : "OFF")));
         }).bounds(cx - 50, cy + 40, 100, 20).build());
         
-        // Save
+        // Save (Current entity only)
         this.addRenderableWidget(Button.builder(Component.literal("Save/Apply"), b -> {
-            try {
-                float ms = Float.parseFloat(maxSpeedBox.getValue());
-                float acc = Float.parseFloat(accelBox.getValue());
-                float brk = Float.parseFloat(brakeBox.getValue());
-                float tr = Float.parseFloat(turnRadBox.getValue());
-                SbwNetwork.CHANNEL.sendToServer(new SaveVehicleConfigPacket(entity.getId(), type, ms, acc, brk, tr, physicsEnabled));
-                this.minecraft.setScreen(null);
-            } catch (Exception e) {
-                // validation failed, don't save
-            }
-        }).bounds(cx - 105, cy + 65, 100, 20).build());
+            save(false);
+        }).bounds(cx - 155, cy + 65, 100, 20).build());
+        
+        // Save (All clones)
+        this.addRenderableWidget(Button.builder(Component.literal("Apply to All Clones"), b -> {
+            save(true);
+        }).bounds(cx - 50, cy + 65, 100, 20).build());
         
         // Cancel
         this.addRenderableWidget(Button.builder(Component.literal("Cancel/Close"), b -> {
             this.minecraft.setScreen(null);
-        }).bounds(cx + 5, cy + 65, 100, 20).build());
+        }).bounds(cx + 55, cy + 65, 100, 20).build());
+    }
+    
+    private void save(boolean applyToAll) {
+        try {
+            float ms = Float.parseFloat(maxSpeedBox.getValue());
+            float acc = Float.parseFloat(accelBox.getValue());
+            float brk = Float.parseFloat(brakeBox.getValue());
+            float tr = Float.parseFloat(turnRadBox.getValue());
+            SbwNetwork.CHANNEL.sendToServer(new SaveVehicleConfigPacket(entity.getId(), type, ms, acc, brk, tr, physicsEnabled, applyToAll));
+            this.minecraft.setScreen(null);
+        } catch (Exception e) {
+            // validation failed, don't save
+        }
     }
 
     private String getTypeName() {
