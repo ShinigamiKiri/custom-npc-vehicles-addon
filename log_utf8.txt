@@ -1,0 +1,150 @@
+﻿commit c0649d1967de6398abdab3043f618c34520b96a3
+Author: ShinigamiKiri <hauhaudepzai@gmail.com>
+Date:   Tue Aug 18 21:00:42 2026 +0700
+
+    Fix entity ID collision by adding iv_ prefix to Immersive Vehicles models and fix ModEntityAttributes double registration
+
+diff --git a/PROJECT_LOG.md b/PROJECT_LOG.md
+index 3ed7a30..59dfb49 100644
+Binary files a/PROJECT_LOG.md and b/PROJECT_LOG.md differ
+
+commit 2e2def5a9a2b2b7f8f188b57660e1ef1101c25d4
+Author: ShinigamiKiri <hauhaudepzai@gmail.com>
+Date:   Tue Aug 18 20:18:32 2026 +0700
+
+    Add Immersive Vehicles integration and bump version to 1.1.0
+
+diff --git a/PROJECT_LOG.md b/PROJECT_LOG.md
+index d5fe865..3ed7a30 100644
+Binary files a/PROJECT_LOG.md and b/PROJECT_LOG.md differ
+
+commit d56f3e5d75ab815bc1eb3ef66051edb9057f0f6d
+Author: ShinigamiKiri <hauhaudepzai@gmail.com>
+Date:   Tue Aug 18 18:19:07 2026 +0700
+
+    Update GitHub Actions to non-deprecated versions
+
+diff --git a/PROJECT_LOG.md b/PROJECT_LOG.md
+index 6c522c1..d5fe865 100644
+--- a/PROJECT_LOG.md
++++ b/PROJECT_LOG.md
+@@ -9,39 +9,27 @@
+ 
+ ## GitHub Repository Setup & Build Guide
+ 
+-To get this mod building on GitHub Actions, follow these exact steps:
+-
+-1. **Initialize an Empty GitHub Repository:**
+-   - Go to GitHub and create a new, empty repository named `SuperbWarfare-NPC-Addon`.
+-   - Do not add a README, license, or `.gitignore` through the GitHub UI. Keep it completely empty.
+-
+-2. **Commit and Push the Code:**
+-   Open a terminal in the `sbw_npc_addon` folder and run:
+-   ```bash
+-   git init
+-   git add .
+-   git commit -m "Initial project scaffold and model extraction"
+-   git branch -M main
+-   git remote add origin https://github.com/YOUR_USERNAME/SuperbWarfare-NPC-Addon.git
+-   git push -u origin main
+-   ```
+-
+-3. **Required Folders and Reference Jars:**
+-   - Our Gradle build script specifically looks for the CustomNPCs jar as a file dependency one directory above the project root.
+-   - For local development, ensure `CustomNPCs-1.20.1-GBPort-Unofficial-20251031.jar` is located at `../CustomNPCs-1.20.1-GBPort-Unofficial-20251031.jar` relative to the `build.gradle` file (which it already is in `D:\Downloads\setingmod`).
+-   - For GitHub Actions, you do *not* need to commit the JAR file to your repo. Since we just generated standard entities, the codebase actually only depends on standard Forge and GeckoLib for the standalone build!
+-
+-4. **Triggering the Build on GitHub Actions:**
+-   - The `.github/workflows/build.yml` file was included in this project.
+-   - Pushing the code to the `main` or `master` branch will automatically trigger the workflow.
+-   - To manually check its progress, go to the **Actions** tab on your GitHub repository page.
+-
+-5. **Downloading the Completed Mod:**
+-   - Once the build succeeds (marked with a green checkmark), click on the workflow run.
+-   - Scroll down to the **Artifacts** section at the bottom of the page.
+-   - Download the `sbw_npc_addon-jar` artifact. It contains the fully compiled `.jar` ready to drop into your `mods` folder!
++The project has now been fully initialized and pushed to GitHub!
++
++- **Remote URL**: `https://github.com/ShinigamiKiri/custom-npc-vehicles-addon`
++- **Latest Commit Hash**: `008fe84149149f9055bb0d0b38b7fab0b61ac4fb`
++
++### How to Trigger the Actions Build
++The `.github/workflows/build.yml` file is automatically configured to build your Forge mod using GitHub's servers and the embedded local `geckolib-forge` jar. Since the push to the `main` branch just happened, it should already be building!
++If you ever need to trigger it manually:
++1. Go to the [GitHub Repository page](https://github.com/ShinigamiKiri/custom-npc-vehicles-addon).
++2. Click on the **Actions** tab at the top.
++3. On the left sidebar, click on **Build Forge Mod**.
++4. Click the **Run workflow** dropdown button on the right side of the screen.
++5. Select the `main` branch and click the green **Run workflow** button.
++
++### How to Download the Artifact
++1. Once the workflow run finishes successfully (you will see a green checkmark next to it in the Actions tab), click on that specific run.
++2. Scroll to the very bottom of the page to the **Artifacts** section.
++3. Click on the `sbw_npc_addon-jar` artifact link.
++4. It will download a zip file containing the fully compiled `.jar` file that is ready to be dragged into your `mods/` folder!
+ 
+ ## GeckoLib 4.7 API Verification Note
+ - **Correction:** The user provided the explicit `geckolib-forge-1.20.1-4.7.jar` locally. I re-scanned the directory, extracted the jar, and mapped its API signatures. 
+ - **Verification:** I verified that `GeoEntity`, `GeoModel`, `GeoEntityRenderer`, `GeckoLibUtil`, and `AnimatableInstanceCache` exactly match the 4.4 assumptions. 
+-- **Build Update:** I updated `build.gradle` to map the explicit file path (`../geckolib-forge-1.20.1-4.7.jar`) instead of the generic `software.bernie.geckolib` Maven repository. All 88 generated entity classes correctly compile and bind to this API natively!
++- **Build Update:** I updated `build.gradle` to map the explicit file path (`libs/geckolib-forge-1.20.1-4.7.jar`) instead of the generic `software.bernie.geckolib` Maven repository. All 88 generated entity classes correctly compile and bind to this API natively!
+
+commit b215e7a8959b2733c67740c39604acd761b75bef
+Author: ShinigamiKiri <hauhaudepzai@gmail.com>
+Date:   Tue Aug 18 18:07:52 2026 +0700
+
+    Initial commit: Setup Forge 1.20.1 project, generated 88 CustomNPCs entities using GeckoLib 4.7
+
+diff --git a/PROJECT_LOG.md b/PROJECT_LOG.md
+new file mode 100644
+index 0000000..6c522c1
+--- /dev/null
++++ b/PROJECT_LOG.md
+@@ -0,0 +1,47 @@
++# Superb Warfare NPC Addon - Project Log
++
++## Naming Decisions
++- **Mod ID**: `sbw_npc_addon` (Short, descriptive, complies with Forge constraints).
++- **Mod Name**: `Superb Warfare NPC Addon` (Clearly states its purpose to combine Superb Warfare models with CustomNPCs capabilities).
++- **Package**: `com.agent.sbwnpcaddon` (Standard Java convention).
++- **Entity Classes**: Generated dynamically per-model to create exactly 88 entities. A base entity class `SbwNpcEntity` extending `PathfinderMob` and implementing `GeoEntity` was used. CustomNPCs treats any `LivingEntity` gracefully, and GeckoLib will handle our rendering.
++- **Audio Structure**: The `sounds/` directory was generated with subfolders: `gunfire`, `cannon`, `bullet_flyby`, and `bullet_impact`. Java `SoundEvent`s were hardcoded to look for generic files like `rifle_shot_01.ogg`. (See `SOUND_TODO.md` for drop-in details).
++
++## GitHub Repository Setup & Build Guide
++
++To get this mod building on GitHub Actions, follow these exact steps:
++
++1. **Initialize an Empty GitHub Repository:**
++   - Go to GitHub and create a new, empty repository named `SuperbWarfare-NPC-Addon`.
++   - Do not add a README, license, or `.gitignore` through the GitHub UI. Keep it completely empty.
++
++2. **Commit and Push the Code:**
++   Open a terminal in the `sbw_npc_addon` folder and run:
++   ```bash
++   git init
++   git add .
++   git commit -m "Initial project scaffold and model extraction"
++   git branch -M main
++   git remote add origin https://github.com/YOUR_USERNAME/SuperbWarfare-NPC-Addon.git
++   git push -u origin main
++   ```
++
++3. **Required Folders and Reference Jars:**
++   - Our Gradle build script specifically looks for the CustomNPCs jar as a file dependency one directory above the project root.
++   - For local development, ensure `CustomNPCs-1.20.1-GBPort-Unofficial-20251031.jar` is located at `../CustomNPCs-1.20.1-GBPort-Unofficial-20251031.jar` relative to the `build.gradle` file (which it already is in `D:\Downloads\setingmod`).
++   - For GitHub Actions, you do *not* need to commit the JAR file to your repo. Since we just generated standard entities, the codebase actually only depends on standard Forge and GeckoLib for the standalone build!
++
++4. **Triggering the Build on GitHub Actions:**
++   - The `.github/workflows/build.yml` file was included in this project.
++   - Pushing the code to the `main` or `master` branch will automatically trigger the workflow.
++   - To manually check its progress, go to the **Actions** tab on your GitHub repository page.
++
++5. **Downloading the Completed Mod:**
++   - Once the build succeeds (marked with a green checkmark), click on the workflow run.
++   - Scroll down to the **Artifacts** section at the bottom of the page.
++   - Download the `sbw_npc_addon-jar` artifact. It contains the fully compiled `.jar` ready to drop into your `mods` folder!
++
++## GeckoLib 4.7 API Verification Note
++- **Correction:** The user provided the explicit `geckolib-forge-1.20.1-4.7.jar` locally. I re-scanned the directory, extracted the jar, and mapped its API signatures. 
++- **Verification:** I verified that `GeoEntity`, `GeoModel`, `GeoEntityRenderer`, `GeckoLibUtil`, and `AnimatableInstanceCache` exactly match the 4.4 assumptions. 
++- **Build Update:** I updated `build.gradle` to map the explicit file path (`../geckolib-forge-1.20.1-4.7.jar`) instead of the generic `software.bernie.geckolib` Maven repository. All 88 generated entity classes correctly compile and bind to this API natively!
