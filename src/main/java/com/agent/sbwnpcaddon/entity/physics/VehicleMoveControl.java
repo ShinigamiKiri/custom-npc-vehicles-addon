@@ -8,6 +8,8 @@ public class VehicleMoveControl extends MoveControl {
     public float forwardIntent = 0.0F;
     public float sideIntent = 0.0F;
 
+    public double wantedY;
+
     public VehicleMoveControl(Mob mob) {
         super(mob);
     }
@@ -20,6 +22,7 @@ public class VehicleMoveControl extends MoveControl {
 
         if (this.operation == Operation.MOVE_TO) {
             double dx = this.wantedX - this.mob.getX();
+            this.wantedY = super.wantedY; // Track height for helicopters
             double dz = this.wantedZ - this.mob.getZ();
             double distanceSq = dx * dx + dz * dz;
 
@@ -32,16 +35,11 @@ public class VehicleMoveControl extends MoveControl {
             float targetYaw = (float)(Mth.atan2(dz, dx) * (double)(180F / (float)Math.PI)) - 90.0F;
             float yawDiff = Mth.wrapDegrees(targetYaw - this.mob.getYRot());
 
-            if (yawDiff > 5.0F) {
-                this.sideIntent = 1.0F;
-            } else if (yawDiff < -5.0F) {
-                this.sideIntent = -1.0F;
-            } else {
-                this.sideIntent = 0.0F;
-            }
+            // Smooth proportional steering to eliminate oscillation
+            this.sideIntent = Mth.clamp(yawDiff / 30.0F, -1.0F, 1.0F);
 
             if (Math.abs(yawDiff) > 60.0F) {
-                this.forwardIntent = 0.3F;
+                this.forwardIntent = 0.3F; // slow down in tight turns
             } else {
                 this.forwardIntent = 1.0F;
             }

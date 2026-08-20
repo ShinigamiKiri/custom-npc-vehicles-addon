@@ -52,15 +52,23 @@ public class SbwNpcAddonMod {
     }
     
     private void onLivingTick(LivingEvent.LivingTickEvent event) {
-        if (event.getEntity().getPersistentData().getBoolean("SbwPhysicsEnabled")) {
-            var module = VehicleConfigTool.physicsModules.get(event.getEntity());
-            if (module == null && event.getEntity() instanceof net.minecraft.world.entity.Mob) {
-                module = new com.agent.sbwnpcaddon.entity.physics.SbwPhysicsModule((net.minecraft.world.entity.Mob) event.getEntity());
-                VehicleConfigTool.physicsModules.put(event.getEntity(), module);
+        var entity = event.getEntity();
+        if (entity.getPersistentData().getBoolean("SbwPhysicsEnabled") && entity instanceof net.minecraft.world.entity.Mob mob) {
+            
+            // Safely inject VehicleMoveControl and LookControl if not present to neutralize vanilla AI
+            if (!(mob.getMoveControl() instanceof com.agent.sbwnpcaddon.entity.physics.VehicleMoveControl)) {
+                mob.moveControl = new com.agent.sbwnpcaddon.entity.physics.VehicleMoveControl(mob);
             }
-            if (module != null) {
-                module.tick(); 
+            if (!(mob.getLookControl() instanceof com.agent.sbwnpcaddon.entity.physics.VehicleLookControl)) {
+                mob.lookControl = new com.agent.sbwnpcaddon.entity.physics.VehicleLookControl(mob);
             }
+
+            var module = VehicleConfigTool.physicsModules.get(mob);
+            if (module == null) {
+                module = new com.agent.sbwnpcaddon.entity.physics.SbwPhysicsModule(mob);
+                VehicleConfigTool.physicsModules.put(mob, module);
+            }
+            module.tick(); 
         }
     }
 }
