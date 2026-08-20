@@ -6,6 +6,13 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 public class SbwPhysicsModule {
+    // --- New constants for mechanical feel ---
+    private static final float INERTIA_BLEND_FACTOR = 0.15f; // (1) Momentum/inertia blend: lower = heavier sliding
+    private static final float STEERING_RAMP_SPEED = 0.15f;  // (2) Steering linkage lag: lower = slower steering response
+    private static final float ACCEL_CURVE_EXPONENT = 1.5f;  // (3) Slower approach to max speed (higher = smoother top-out)
+    private static final int BRAKE_DELAY_TICKS = 8;          // (3) Ticks before full brake force applies (soft braking)
+    // -----------------------------------------
+
     private final Mob entity;
     
     private final Quaternionf rotation = new Quaternionf();
@@ -15,6 +22,12 @@ public class SbwPhysicsModule {
     
     private double currentSpeed = 0.0;
     private Vec3 velocity = Vec3.ZERO;
+    
+    // New state variables for mechanical smoothing
+    private float actualTurnRate = 0.0f;
+    private int brakeTicks = 0;
+    private double actualVelX = 0.0;
+    private double actualVelZ = 0.0;
     
     public SbwPhysicsModule(Mob entity) {
         this.entity = entity;
@@ -38,30 +51,49 @@ public class SbwPhysicsModule {
         }
         
         if (type == 0 || type == 1) { // Ground or Boat
+            float speedRatio = (float) (Math.abs(currentSpeed) / maxSpeed);
+            speedRatio = Math.min(1.0f, Math.max(0.0f, speedRatio));
+
             if (forwardInput > 0) {
-                if (currentSpeed < maxSpeed) currentSpeed += acceleration;
+                brakeTicks = 0;
+                if (currentSpeed < maxSpeed) {
+                    float startFactor = Math.min(1.0f, 0.3f + speedRatio * 3.0f);
+                    float curveFactor = (float) Math.pow(1.0f - speedRatio, ACCEL_CURVE_EXPONENT);
+                    float accelMultiplier = startFactor * curveFactor;
+                    currentSpeed += acceleration * accelMultiplier;
+                }
             } else if (forwardInput < 0) {
-                currentSpeed -= braking;
+                brakeTicks++;
+                float brakeMultiplier = Math.min(1.0f, (float) brakeTicks / BRAKE_DELAY_TICKS);
+                currentSpeed -= braking * brakeMultiplier;
                 if (currentSpeed < -maxSpeed / 2) currentSpeed = -maxSpeed / 2;
             } else {
+                brakeTicks = 0;
                 currentSpeed *= 0.90; 
                 if (currentSpeed < 0.01 && currentSpeed > -0.01) currentSpeed = 0;
             }
             
-            float speedFactor = (float) Math.abs(currentSpeed);
-            if (speedFactor > 0.01) {
+            float targetTurnRate = 0.0f;
+            if (Math.abs(currentSpeed) > 0.01) {
                 float maxTurnRate = Math.min(turnRadius, 5.0f);
-                float turnRate = maxTurnRate / (1.0f + speedFactor * 5.0f);
+                float baseTurnRate = maxTurnRate / (1.0f + speedRatio * 5.0f);
                 
                 if (sideInput > 0) {
-                    hullYaw += turnRate; 
+                    targetTurnRate = baseTurnRate;
                 } else if (sideInput < 0) {
-                    hullYaw -= turnRate;
+                    targetTurnRate = -baseTurnRate;
                 }
             }
             
+            actualTurnRate += (targetTurnRate - actualTurnRate) * STEERING_RAMP_SPEED;
+            hullYaw += actualTurnRate;
+            
             float radYaw = (float) Math.toRadians(hullYaw);
-            Vec3 forwardDir = new Vec3(-Math.sin(radYaw), 0, Math.cos(radYaw));
+            double targetVelX = -Math.sin(radYaw) * currentSpeed;
+            double targetVelZ = Math.cos(radYaw) * currentSpeed;
+            
+            actualVelX += (targetVelX - actualVelX) * INERTIA_BLEND_FACTOR;
+            actualVelZ += (targetVelZ - actualVelZ) * INERTIA_BLEND_FACTOR;
             
             double ySpeed = entity.getDeltaMovement().y;
             if (type == 0 && !entity.onGround()) {
@@ -70,12 +102,26 @@ public class SbwPhysicsModule {
                 ySpeed = 0; 
             }
             
-            velocity = new Vec3(forwardDir.x * currentSpeed, ySpeed, forwardDir.z * currentSpeed);
+            velocity = new Vec3(actualVelX, ySpeed, actualVelZ);
             entity.setDeltaMovement(velocity);
+            
+            float targetRoll = actualTurnRate * speedRatio * -15.0f; 
+            float targetPitch = 0.0f;
+            if (forwardInput > 0) targetPitch = -2.0f * speedRatio;
+            else if (forwardInput < 0) targetPitch = 4.0f * Math.min(1.0f, (float)brakeTicks / BRAKE_DELAY_TICKS);
+            
+            pitch += (targetPitch - pitch) * 0.15f;
+            roll += (targetRoll - roll) * 0.15f;
+            
+            rotation.identity()
+                    .rotateY((float) Math.toRadians(hullYaw))
+                    .rotateX((float) Math.toRadians(pitch))
+                    .rotateZ((float) Math.toRadians(roll));
             
             entity.setYRot(hullYaw);
             entity.yBodyRot = hullYaw;
             entity.yHeadRot = hullYaw;
+            entity.setXRot(pitch);
             
         } else { // Plane or Heli
             float targetPitch = forwardInput * 30.0f;
@@ -103,11 +149,15 @@ public class SbwPhysicsModule {
             
             if (forwardInput > 0 && currentSpeed < maxSpeed) {
                 currentSpeed += acceleration;
+                brakeTicks = 0;
             } else if (forwardInput < 0) {
-                currentSpeed -= braking;
+                brakeTicks++;
+                float brakeMultiplier = Math.min(1.0f, (float) brakeTicks / BRAKE_DELAY_TICKS);
+                currentSpeed -= braking * brakeMultiplier;
                 if (currentSpeed < 0) currentSpeed = 0;
             } else {
                 currentSpeed *= 0.95;
+                brakeTicks = 0;
             }
             
             velocity = new Vec3(forwardVec.x, forwardVec.y, forwardVec.z).scale(currentSpeed);
@@ -123,6 +173,9 @@ public class SbwPhysicsModule {
             }
             
             entity.setDeltaMovement(velocity);
+            
+            actualVelX = velocity.x;
+            actualVelZ = velocity.z;
             
             entity.setYRot(hullYaw);
             entity.yBodyRot = hullYaw;
