@@ -30,6 +30,34 @@ public class IvNpcEntity extends PathfinderMob {
     }
 
     @Override
+    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        var data = this.getPersistentData();
+        if (data.contains("SbwPhysicsEnabled")) {
+            tag.putInt("SbwVehicleType", data.getInt("SbwVehicleType"));
+            tag.putFloat("SbwMaxSpeed", data.getFloat("SbwMaxSpeed"));
+            tag.putFloat("SbwAcceleration", data.getFloat("SbwAcceleration"));
+            tag.putFloat("SbwBraking", data.getFloat("SbwBraking"));
+            tag.putFloat("SbwTurnRadius", data.getFloat("SbwTurnRadius"));
+            tag.putBoolean("SbwPhysicsEnabled", data.getBoolean("SbwPhysicsEnabled"));
+        }
+    }
+
+    @Override
+    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains("SbwPhysicsEnabled")) {
+            var data = this.getPersistentData();
+            data.putInt("SbwVehicleType", tag.getInt("SbwVehicleType"));
+            data.putFloat("SbwMaxSpeed", tag.getFloat("SbwMaxSpeed"));
+            data.putFloat("SbwAcceleration", tag.getFloat("SbwAcceleration"));
+            data.putFloat("SbwBraking", tag.getFloat("SbwBraking"));
+            data.putFloat("SbwTurnRadius", tag.getFloat("SbwTurnRadius"));
+            data.putBoolean("SbwPhysicsEnabled", tag.getBoolean("SbwPhysicsEnabled"));
+        }
+    }
+
+    @Override
     public double getPassengersRidingOffset() {
         if (this.getPersistentData().contains("SbwSeatOffset")) {
             return this.getPersistentData().getDouble("SbwSeatOffset");

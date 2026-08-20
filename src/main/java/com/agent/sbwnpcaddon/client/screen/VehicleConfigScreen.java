@@ -24,10 +24,10 @@ public class VehicleConfigScreen extends Screen {
         this.entity = entity;
         
         this.type = entity.getPersistentData().getInt("SbwVehicleType");
-        float ms = entity.getPersistentData().contains("SbwMaxSpeed") ? entity.getPersistentData().getFloat("SbwMaxSpeed") : 1.5f;
-        float acc = entity.getPersistentData().contains("SbwAcceleration") ? entity.getPersistentData().getFloat("SbwAcceleration") : 0.02f;
-        float brk = entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.05f;
-        float tr = entity.getPersistentData().contains("SbwTurnRadius") ? entity.getPersistentData().getFloat("SbwTurnRadius") : 2.0f;
+        float ms = entity.getPersistentData().contains("SbwMaxSpeed") ? entity.getPersistentData().getFloat("SbwMaxSpeed") : 0.5f;
+        float acc = entity.getPersistentData().contains("SbwAcceleration") ? entity.getPersistentData().getFloat("SbwAcceleration") : 0.005f;
+        float brk = entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.02f;
+        float tr = entity.getPersistentData().contains("SbwTurnRadius") ? entity.getPersistentData().getFloat("SbwTurnRadius") : 1.0f;
         this.physicsEnabled = entity.getPersistentData().getBoolean("SbwPhysicsEnabled");
     }
 
@@ -40,10 +40,10 @@ public class VehicleConfigScreen extends Screen {
         brakeBox = new EditBox(net.minecraft.client.Minecraft.getInstance().font, 0, 0, 100, 20, Component.empty());
         turnRadBox = new EditBox(net.minecraft.client.Minecraft.getInstance().font, 0, 0, 100, 20, Component.empty());
         
-        float ms = entity.getPersistentData().contains("SbwMaxSpeed") ? entity.getPersistentData().getFloat("SbwMaxSpeed") : 1.5f;
-        float acc = entity.getPersistentData().contains("SbwAcceleration") ? entity.getPersistentData().getFloat("SbwAcceleration") : 0.02f;
-        float brk = entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.05f;
-        float tr = entity.getPersistentData().contains("SbwTurnRadius") ? entity.getPersistentData().getFloat("SbwTurnRadius") : 2.0f;
+        float ms = entity.getPersistentData().contains("SbwMaxSpeed") ? entity.getPersistentData().getFloat("SbwMaxSpeed") : 0.5f;
+        float acc = entity.getPersistentData().contains("SbwAcceleration") ? entity.getPersistentData().getFloat("SbwAcceleration") : 0.005f;
+        float brk = entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.02f;
+        float tr = entity.getPersistentData().contains("SbwTurnRadius") ? entity.getPersistentData().getFloat("SbwTurnRadius") : 1.0f;
         
         maxSpeedBox.setValue(String.valueOf(ms));
         accelBox.setValue(String.valueOf(acc));

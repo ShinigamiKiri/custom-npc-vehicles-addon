@@ -8,10 +8,10 @@ import net.minecraft.util.Mth;
 
 public class SbwPhysicsModule {
     // --- New constants for mechanical feel ---
-    private static final float INERTIA_BLEND_FACTOR = 0.15f; 
-    private static final float STEERING_RAMP_SPEED = 0.15f;  
-    private static final float ACCEL_CURVE_EXPONENT = 1.5f;  
-    private static final int BRAKE_DELAY_TICKS = 8;          
+    private static final float INERTIA_BLEND_FACTOR = 0.05f; 
+    private static final float STEERING_RAMP_SPEED = 0.05f;  
+    private static final float ACCEL_CURVE_EXPONENT = 2.5f;  
+    private static final int BRAKE_DELAY_TICKS = 15;          
     // -----------------------------------------
 
     private final Mob entity;
@@ -42,9 +42,11 @@ public class SbwPhysicsModule {
     public void tick() {
         int type = entity.getPersistentData().getInt("SbwVehicleType");
         
-        float maxSpeed = entity.getPersistentData().contains("SbwMaxSpeed") ? entity.getPersistentData().getFloat("SbwMaxSpeed") : 0.5f;
-        float acceleration = entity.getPersistentData().contains("SbwAcceleration") ? entity.getPersistentData().getFloat("SbwAcceleration") : 0.005f;
-        float braking = entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.02f;
+        // Scale down speeds significantly so 0.5 is slower than a mob
+        float speedScale = 0.25f;
+        float maxSpeed = (entity.getPersistentData().contains("SbwMaxSpeed") ? entity.getPersistentData().getFloat("SbwMaxSpeed") : 0.5f) * speedScale;
+        float acceleration = (entity.getPersistentData().contains("SbwAcceleration") ? entity.getPersistentData().getFloat("SbwAcceleration") : 0.005f) * speedScale;
+        float braking = (entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.02f) * speedScale;
         float turnRadius = entity.getPersistentData().contains("SbwTurnRadius") ? entity.getPersistentData().getFloat("SbwTurnRadius") : 1.0f;
         
         float forwardInput = entity.zza; 
@@ -104,15 +106,30 @@ public class SbwPhysicsModule {
             actualVelX += (targetVelX - actualVelX) * INERTIA_BLEND_FACTOR;
             actualVelZ += (targetVelZ - actualVelZ) * INERTIA_BLEND_FACTOR;
             
-            actualVelY = entity.getDeltaMovement().y;
             if (type == 0 && !entity.onGround()) {
                 actualVelY -= 0.08; 
+            } else if (type == 0 && entity.onGround()) {
+                actualVelY = 0;
             } else if (type == 1) {
                 actualVelY = 0; 
             }
             
             velocity = new Vec3(actualVelX, actualVelY, actualVelZ);
-            entity.setDeltaMovement(velocity);
+            if (type == 0 || type == 1) {
+                entity.setMaxUpStep(1.0f);
+            }
+            entity.move(net.minecraft.world.entity.MoverType.SELF, velocity);
+            
+            Vec3 postMove = entity.getDeltaMovement();
+            actualVelX = postMove.x;
+            actualVelY = postMove.y;
+            actualVelZ = postMove.z;
+            
+            if (entity.horizontalCollision) {
+                currentSpeed *= 0.1;
+            }
+            
+            entity.setDeltaMovement(Vec3.ZERO);
             
             float targetRoll = actualTurnRate * speedRatio * -15.0f; 
             float targetPitch = 0.0f;
@@ -197,8 +214,6 @@ public class SbwPhysicsModule {
             actualVelZ += (targetVelZ - actualVelZ) * aeroBlend;
             
             // Lift mechanics
-            actualVelY = entity.getDeltaMovement().y;
-            
             float gravity = 0.08f;
             
             if (type == 2) { // Plane Lift
@@ -234,11 +249,18 @@ public class SbwPhysicsModule {
             }
             
             velocity = new Vec3(actualVelX, actualVelY, actualVelZ);
-            entity.setDeltaMovement(velocity);
+            entity.move(net.minecraft.world.entity.MoverType.SELF, velocity);
             
-            actualVelX = velocity.x;
-            actualVelY = velocity.y;
-            actualVelZ = velocity.z;
+            Vec3 postMove = entity.getDeltaMovement();
+            actualVelX = postMove.x;
+            actualVelY = postMove.y;
+            actualVelZ = postMove.z;
+            
+            if (entity.horizontalCollision) {
+                currentSpeed *= 0.1;
+            }
+            
+            entity.setDeltaMovement(Vec3.ZERO);
         }
     }
     

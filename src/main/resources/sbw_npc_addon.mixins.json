@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "sbw_npc_addon.refmap.json",
   "mixins": [
-    "MobAccessor"
+    "MobAccessor",
+    "MixinGunShootGoal"
   ],
   "client": [
   ],

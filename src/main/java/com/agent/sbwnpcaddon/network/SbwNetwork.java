@@ -16,5 +16,6 @@ public class SbwNetwork {
     public static void register() {
         int id = 0;
         CHANNEL.registerMessage(id++, SaveVehicleConfigPacket.class, SaveVehicleConfigPacket::toBytes, SaveVehicleConfigPacket::new, SaveVehicleConfigPacket::handle);
+        CHANNEL.registerMessage(id++, SyncVehicleConfigPacket.class, SyncVehicleConfigPacket::toBytes, SyncVehicleConfigPacket::new, SyncVehicleConfigPacket::handle);
     }
 }

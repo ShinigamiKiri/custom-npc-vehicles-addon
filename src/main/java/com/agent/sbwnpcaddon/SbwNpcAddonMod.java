@@ -33,8 +33,18 @@ public class SbwNpcAddonMod {
     
     private void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
         if (event.getItemStack().getItem() == ItemRegistry.VEHICLE_CONFIG_TOOL.get()) {
-            if (event.getLevel().isClientSide) {
-                net.minecraft.client.Minecraft.getInstance().setScreen(new com.agent.sbwnpcaddon.client.screen.VehicleConfigScreen((net.minecraft.world.entity.LivingEntity) event.getTarget()));
+            if (!event.getLevel().isClientSide && event.getTarget() instanceof net.minecraft.world.entity.LivingEntity target) {
+                int type = target.getPersistentData().getInt("SbwVehicleType");
+                float ms = target.getPersistentData().contains("SbwMaxSpeed") ? target.getPersistentData().getFloat("SbwMaxSpeed") : 0.5f;
+                float acc = target.getPersistentData().contains("SbwAcceleration") ? target.getPersistentData().getFloat("SbwAcceleration") : 0.005f;
+                float brk = target.getPersistentData().contains("SbwBraking") ? target.getPersistentData().getFloat("SbwBraking") : 0.02f;
+                float tr = target.getPersistentData().contains("SbwTurnRadius") ? target.getPersistentData().getFloat("SbwTurnRadius") : 1.0f;
+                boolean phys = target.getPersistentData().getBoolean("SbwPhysicsEnabled");
+
+                com.agent.sbwnpcaddon.network.SbwNetwork.CHANNEL.send(
+                    net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> (net.minecraft.server.level.ServerPlayer) event.getEntity()),
+                    new com.agent.sbwnpcaddon.network.SyncVehicleConfigPacket(target.getId(), type, ms, acc, brk, tr, phys)
+                );
             }
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
@@ -43,9 +53,6 @@ public class SbwNpcAddonMod {
 
     private void onEntityInteractSpecific(PlayerInteractEvent.EntityInteractSpecific event) {
         if (event.getItemStack().getItem() == ItemRegistry.VEHICLE_CONFIG_TOOL.get()) {
-            if (event.getLevel().isClientSide) {
-                net.minecraft.client.Minecraft.getInstance().setScreen(new com.agent.sbwnpcaddon.client.screen.VehicleConfigScreen((net.minecraft.world.entity.LivingEntity) event.getTarget()));
-            }
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
         }
