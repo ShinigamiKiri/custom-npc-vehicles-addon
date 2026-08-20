@@ -88,6 +88,10 @@ public class SbwPhysicsModule {
             actualTurnRate += (targetTurnRate - actualTurnRate) * STEERING_RAMP_SPEED;
             hullYaw += actualTurnRate;
             
+            // --- ADOPTED: Speed Bleed / Turning Drag (Flan's Mod) ---
+            // Sharp turning bleeds forward momentum, forcing deceleration through tight corners.
+            currentSpeed *= (1.0 - Math.abs(actualTurnRate) * 0.015);
+            
             float radYaw = (float) Math.toRadians(hullYaw);
             double targetVelX = -Math.sin(radYaw) * currentSpeed;
             double targetVelZ = Math.cos(radYaw) * currentSpeed;
@@ -160,18 +164,40 @@ public class SbwPhysicsModule {
                 brakeTicks = 0;
             }
             
-            velocity = new Vec3(forwardVec.x, forwardVec.y, forwardVec.z).scale(currentSpeed);
+            // --- ADOPTED: Aerodynamic Momentum Correction (Planes) ---
+            // Blend velocity towards forward vector, rather than instantly snapping
+            double targetVelX = forwardVec.x * currentSpeed;
+            double targetVelY = forwardVec.y * currentSpeed;
+            double targetVelZ = forwardVec.z * currentSpeed;
             
+            float aeroBlend = (type == 3) ? 1.0f : 0.05f; // Helicopters are snappy; planes drift
+            actualVelX += (targetVelX - actualVelX) * aeroBlend;
+            actualVelZ += (targetVelZ - actualVelZ) * aeroBlend;
+            
+            double actualVelY = entity.getDeltaMovement().y;
+            actualVelY += (targetVelY - actualVelY) * aeroBlend;
+            
+            // --- ADOPTED: Speed-Squared Lift (Planes) ---
             if (type == 2) { 
-                if (currentSpeed < maxSpeed * 0.3f) {
-                    velocity = velocity.add(0, -0.05, 0); 
+                float speedSquared = (float) (currentSpeed * currentSpeed);
+                // The lift force is proportional to v^2, acting counter to gravity
+                float liftConstant = 2.0f; // Tuned for standard max speed ~0.5
+                float lift = speedSquared * liftConstant;
+                float gravity = 0.08f;
+                
+                // Cap lift to prevent floating off indefinitely, just offset gravity for level flight
+                if (lift > gravity) {
+                    lift = gravity;
                 }
+                actualVelY -= gravity;
+                actualVelY += lift;
             } else if (type == 3) { 
                 if (forwardInput == 0 && currentSpeed < 0.1) {
-                    velocity = new Vec3(0, 0, 0); 
+                    actualVelY *= 0.8;
                 }
             }
             
+            velocity = new Vec3(actualVelX, actualVelY, actualVelZ);
             entity.setDeltaMovement(velocity);
             
             actualVelX = velocity.x;
