@@ -217,19 +217,28 @@ public class SbwPhysicsModule {
             float gravity = 0.08f;
             
             if (type == 2) { // Plane Lift
-                // Lift = v^2 * liftConstant
+                float stallSpeedSq = maxSpeed * maxSpeed * 0.3f; // Stall threshold (~55% max speed)
                 float speedSquared = (float) (currentSpeed * currentSpeed);
-                float liftConstant = gravity / (maxSpeed * maxSpeed * 0.3f); // Stall below ~55% max speed
-                float lift = speedSquared * liftConstant;
                 
-                // Cap lift to avoid launching into space infinitely when going fast, just roughly counter gravity
-                if (lift > gravity * 1.5f) lift = gravity * 1.5f;
+                actualVelY -= gravity; // Always apply gravity first
                 
-                actualVelY -= gravity; // Apply gravity
-                actualVelY += lift;    // Apply lift
+                if (speedSquared < stallSpeedSq) {
+                    // Below takeoff speed: no lift generated. Stay glued to ground/fall.
+                    // Ignore upward pitch so we don't climb like a helicopter.
+                    if (targetVelY > 0) targetVelY = 0;
+                    
+                    // Allow engine to push nose down if falling
+                    actualVelY += (targetVelY - actualVelY) * aeroBlend;
+                } else {
+                    // Above takeoff speed: lift counters gravity perfectly (equilibrium)
+                    actualVelY += gravity; 
+                    
+                    // Climb/dive is now dictated purely by engine pitch (targetVelY)
+                    actualVelY += (targetVelY - actualVelY) * aeroBlend;
+                }
                 
-                // Blend engine climb/dive velocity based on forward pitch
-                actualVelY += (targetVelY - actualVelY) * aeroBlend;
+                // Apply vertical drag/damping so we don't infinitely accelerate upwards/downwards
+                actualVelY *= 0.90;
                 
             } else if (type == 3) { // Helicopter Lift
                 // Helicopters use engine thrust directly as lift

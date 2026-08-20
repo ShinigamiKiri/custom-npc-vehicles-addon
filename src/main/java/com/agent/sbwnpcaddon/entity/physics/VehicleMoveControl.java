@@ -26,9 +26,10 @@ public class VehicleMoveControl extends MoveControl {
             double dz = this.wantedZ - this.mob.getZ();
             double distanceSq = dx * dx + dz * dz;
 
-            if (distanceSq < 4.0) {
+            if (distanceSq < 0.25) { // 0.5 blocks, matches vanilla pathfinder completion radius
                 this.forwardIntent = 0.0F;
                 this.sideIntent = 0.0F;
+                this.operation = Operation.WAIT; // Mark operation as done
                 return;
             }
 
