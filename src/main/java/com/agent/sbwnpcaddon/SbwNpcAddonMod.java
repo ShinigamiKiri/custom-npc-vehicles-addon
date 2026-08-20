@@ -57,10 +57,10 @@ public class SbwNpcAddonMod {
             
             // Safely inject VehicleMoveControl and LookControl if not present to neutralize vanilla AI
             if (!(mob.getMoveControl() instanceof com.agent.sbwnpcaddon.entity.physics.VehicleMoveControl)) {
-                mob.moveControl = new com.agent.sbwnpcaddon.entity.physics.VehicleMoveControl(mob);
+                ((com.agent.sbwnpcaddon.mixin.MobAccessor)mob).setMoveControl(new com.agent.sbwnpcaddon.entity.physics.VehicleMoveControl(mob));
             }
             if (!(mob.getLookControl() instanceof com.agent.sbwnpcaddon.entity.physics.VehicleLookControl)) {
-                mob.lookControl = new com.agent.sbwnpcaddon.entity.physics.VehicleLookControl(mob);
+                ((com.agent.sbwnpcaddon.mixin.MobAccessor)mob).setLookControl(new com.agent.sbwnpcaddon.entity.physics.VehicleLookControl(mob));
             }
 
             var module = VehicleConfigTool.physicsModules.get(mob);
