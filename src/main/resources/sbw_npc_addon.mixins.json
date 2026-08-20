@@ -6,7 +6,7 @@
   "refmap": "sbw_npc_addon.refmap.json",
   "mixins": [
     "MobAccessor",
-    "MixinGunShootGoal"
+    "MixinEntityAIRangedAttack"
   ],
   "client": [
   ],
