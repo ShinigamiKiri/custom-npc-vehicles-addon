@@ -21,6 +21,7 @@ public class TradeCompletePacket {
                 tradeMenu.tryCompleteTrade();
             }
         });
+        context.setPacketHandled(true);
         return true;
     }
 }
