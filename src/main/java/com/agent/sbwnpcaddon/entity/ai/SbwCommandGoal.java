@@ -28,21 +28,19 @@ public class SbwCommandGoal extends Goal {
         this.towardsPointB = false;
     }
 
+    public void deactivate() {
+        this.active = false;
+    }
+
     @Override
     public boolean canUse() {
         if (!active) return false;
 
         Player owner = getOwner();
         if (owner == null) {
-            active = false;
-            return false;
-        }
-
-        // Must be holding the command device
-        if (!(owner.getMainHandItem().getItem() instanceof com.agent.sbwnpcaddon.item.CommandDeviceItem) &&
-            !(owner.getOffhandItem().getItem() instanceof com.agent.sbwnpcaddon.item.CommandDeviceItem)) {
-            active = false; // Disable if they stop holding it
-            return false;
+            // we no longer care if the owner is offline, we just execute the command!
+            // Wait, Custom NPCs follow goal disables if owner is offline. But for patrol/move, it's independent!
+            // So we don't even need to check if owner is null.
         }
 
         return true;

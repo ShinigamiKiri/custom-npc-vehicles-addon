@@ -76,22 +76,31 @@ public class CommandDeviceScreen extends Screen {
             }).bounds(cx - 110, listY + i * 22, 200, 20).build());
         }
 
-        this.addRenderableWidget(Button.builder(Component.literal("Execute"), b -> {
-            executeCommand();
-        }).bounds(cx + 100, cy + 10, 90, 20).build());
+        this.addRenderableWidget(Button.builder(Component.literal("Execute Command"), b -> {
+            executeCommand(false);
+        }).bounds(cx + 100, cy + 10, 110, 20).build());
+        
+        this.addRenderableWidget(Button.builder(Component.literal("Cancel Command / Resume Follow"), b -> {
+            executeCommand(true);
+        }).bounds(cx + 100, cy + 35, 180, 20).build());
     }
 
-    private void executeCommand() {
+    private void executeCommand(boolean cancel) {
         try {
-            double x = Double.parseDouble(xBox.getValue());
-            double y = Double.parseDouble(yBox.getValue());
-            double z = Double.parseDouble(zBox.getValue());
+            double x = 0, y = 0, z = 0;
+            double px = 0, py = 0, pz = 0;
+            
+            if (!cancel) {
+                x = Double.parseDouble(xBox.getValue());
+                y = Double.parseDouble(yBox.getValue());
+                z = Double.parseDouble(zBox.getValue());
 
-            double px = x, py = y, pz = z;
-            if (patrolMode) {
-                px = Double.parseDouble(pxBox.getValue());
-                py = Double.parseDouble(pyBox.getValue());
-                pz = Double.parseDouble(pzBox.getValue());
+                px = x; py = y; pz = z;
+                if (patrolMode) {
+                    px = Double.parseDouble(pxBox.getValue());
+                    py = Double.parseDouble(pyBox.getValue());
+                    pz = Double.parseDouble(pzBox.getValue());
+                }
             }
 
             List<Integer> selectedIds = new ArrayList<>();
@@ -102,7 +111,7 @@ public class CommandDeviceScreen extends Screen {
             }
 
             if (!selectedIds.isEmpty()) {
-                SbwNetwork.CHANNEL.sendToServer(new IssueCommandDevicePacket(selectedIds, patrolMode, x, y, z, px, py, pz));
+                SbwNetwork.CHANNEL.sendToServer(new IssueCommandDevicePacket(selectedIds, cancel, patrolMode, x, y, z, px, py, pz));
             }
             this.minecraft.setScreen(null);
         } catch (Exception e) {

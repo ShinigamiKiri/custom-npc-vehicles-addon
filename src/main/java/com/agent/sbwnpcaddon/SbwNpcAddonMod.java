@@ -75,6 +75,10 @@ public class SbwNpcAddonMod {
     
     private void onLivingTick(LivingEvent.LivingTickEvent event) {
         var entity = event.getEntity();
+        if (entity instanceof net.minecraft.world.entity.Mob mob) {
+            com.agent.sbwnpcaddon.entity.ai.CommandDeviceHelper.ensureCommandRestored(mob);
+        }
+
         if (entity.getPersistentData().getBoolean("SbwPhysicsEnabled") && entity instanceof net.minecraft.world.entity.Mob mob) {
             
             // Safely inject VehicleMoveControl and LookControl if not present to neutralize vanilla AI
