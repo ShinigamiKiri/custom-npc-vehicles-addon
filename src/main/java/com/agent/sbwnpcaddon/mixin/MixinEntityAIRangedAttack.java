@@ -18,7 +18,7 @@ public abstract class MixinEntityAIRangedAttack {
     @Shadow
     private int rangedAttackTime;
 
-    @Inject(method = {"tick()V", "m_8037_()V"}, at = @At("HEAD"), remap = false)
+    @Inject(method = "m_8037_()V", at = @At("HEAD"), remap = false)
     private void sbw_onTick(CallbackInfo ci) {
         if (this.npc != null && this.npc.getPersistentData().getBoolean("SbwPhysicsEnabled")) {
             int type = this.npc.getPersistentData().getInt("SbwVehicleType");
