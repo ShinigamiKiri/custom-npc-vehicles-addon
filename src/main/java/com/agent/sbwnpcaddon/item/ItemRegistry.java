@@ -15,6 +15,9 @@ public class ItemRegistry {
     public static final RegistryObject<Item> COMMAND_DEVICE = ITEMS.register("command_device",
             () -> new CommandDeviceItem(new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> NPC_TRADING_BLOCK_ITEM = ITEMS.register("npc_trading_block",
+            () -> new net.minecraft.world.item.BlockItem(com.agent.sbwnpcaddon.block.BlockRegistry.NPC_TRADING_BLOCK.get(), new Item.Properties()));
+
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }

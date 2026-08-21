@@ -10,6 +10,14 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = "sbw_npc_addon", bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientSetup {
     @SubscribeEvent
+    public static void registerScreens(net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent event) {
+        event.enqueueWork(() -> {
+            net.minecraft.client.gui.screens.MenuScreens.register(com.agent.sbwnpcaddon.menu.MenuRegistry.NPC_TRADING_SETUP_MENU.get(), com.agent.sbwnpcaddon.client.screen.NpcTradingSetupScreen::new);
+            net.minecraft.client.gui.screens.MenuScreens.register(com.agent.sbwnpcaddon.menu.MenuRegistry.NPC_TRADING_MENU.get(), com.agent.sbwnpcaddon.client.screen.NpcTradingScreen::new);
+        });
+    }
+
+    @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(EntityRegistry.AA_12.get(), ctx -> new SbwNpcRenderer(ctx, "aa_12"));
         event.registerEntityRenderer(EntityRegistry.AH_6.get(), ctx -> new SbwNpcRenderer(ctx, "ah_6"));

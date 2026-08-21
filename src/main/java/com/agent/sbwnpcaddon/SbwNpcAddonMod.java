@@ -23,6 +23,9 @@ public class SbwNpcAddonMod {
         EntityRegistry.register(modEventBus);
         SoundRegistry.register(modEventBus);
         ItemRegistry.register(modEventBus);
+        com.agent.sbwnpcaddon.block.BlockRegistry.register(modEventBus);
+        com.agent.sbwnpcaddon.block.entity.BlockEntityRegistry.register(modEventBus);
+        com.agent.sbwnpcaddon.menu.MenuRegistry.register(modEventBus);
         
         MinecraftForge.EVENT_BUS.addListener(this::onLivingTick);
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onEntityInteract);

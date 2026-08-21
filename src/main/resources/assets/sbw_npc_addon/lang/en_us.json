@@ -1,3 +1,4 @@
 {
-  "item.sbw_npc_addon.command_device": "Command Device"
+  "item.sbw_npc_addon.command_device": "Command Device",
+  "block.sbw_npc_addon.npc_trading_block": "NPC Trading Block"
 }
