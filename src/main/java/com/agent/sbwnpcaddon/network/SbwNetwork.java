@@ -17,5 +17,7 @@ public class SbwNetwork {
         int id = 0;
         CHANNEL.registerMessage(id++, SaveVehicleConfigPacket.class, SaveVehicleConfigPacket::toBytes, SaveVehicleConfigPacket::new, SaveVehicleConfigPacket::handle);
         CHANNEL.registerMessage(id++, SyncVehicleConfigPacket.class, SyncVehicleConfigPacket::toBytes, SyncVehicleConfigPacket::new, SyncVehicleConfigPacket::handle);
+        CHANNEL.registerMessage(id++, OpenCommandDeviceGuiPacket.class, OpenCommandDeviceGuiPacket::toBytes, OpenCommandDeviceGuiPacket::new, OpenCommandDeviceGuiPacket::handle);
+        CHANNEL.registerMessage(id++, IssueCommandDevicePacket.class, IssueCommandDevicePacket::toBytes, IssueCommandDevicePacket::new, IssueCommandDevicePacket::handle);
     }
 }

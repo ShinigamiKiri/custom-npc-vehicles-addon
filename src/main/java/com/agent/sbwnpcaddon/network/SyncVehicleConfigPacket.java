@@ -16,15 +16,17 @@ public class SyncVehicleConfigPacket {
     private final float acceleration;
     private final float braking;
     private final float turnRadius;
+    private final int aircraftMode;
     private final boolean physicsEnabled;
 
-    public SyncVehicleConfigPacket(int entityId, int type, float maxSpeed, float acceleration, float braking, float turnRadius, boolean physicsEnabled) {
+    public SyncVehicleConfigPacket(int entityId, int type, float maxSpeed, float acceleration, float braking, float turnRadius, int aircraftMode, boolean physicsEnabled) {
         this.entityId = entityId;
         this.type = type;
         this.maxSpeed = maxSpeed;
         this.acceleration = acceleration;
         this.braking = braking;
         this.turnRadius = turnRadius;
+        this.aircraftMode = aircraftMode;
         this.physicsEnabled = physicsEnabled;
     }
 
@@ -35,6 +37,7 @@ public class SyncVehicleConfigPacket {
         this.acceleration = buf.readFloat();
         this.braking = buf.readFloat();
         this.turnRadius = buf.readFloat();
+        this.aircraftMode = buf.readInt();
         this.physicsEnabled = buf.readBoolean();
     }
 
@@ -45,6 +48,7 @@ public class SyncVehicleConfigPacket {
         buf.writeFloat(acceleration);
         buf.writeFloat(braking);
         buf.writeFloat(turnRadius);
+        buf.writeInt(aircraftMode);
         buf.writeBoolean(physicsEnabled);
     }
 
@@ -60,6 +64,7 @@ public class SyncVehicleConfigPacket {
                     living.getPersistentData().putFloat("SbwAcceleration", acceleration);
                     living.getPersistentData().putFloat("SbwBraking", braking);
                     living.getPersistentData().putFloat("SbwTurnRadius", turnRadius);
+                    living.getPersistentData().putInt("SbwAircraftMode", aircraftMode);
                     living.getPersistentData().putBoolean("SbwPhysicsEnabled", physicsEnabled);
                     
                     net.minecraft.client.Minecraft.getInstance().setScreen(new com.agent.sbwnpcaddon.client.screen.VehicleConfigScreen(living));

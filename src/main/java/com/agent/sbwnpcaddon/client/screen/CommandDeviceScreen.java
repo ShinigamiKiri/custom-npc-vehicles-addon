@@ -1,0 +1,129 @@
+package com.agent.sbwnpcaddon.client.screen;
+
+import com.agent.sbwnpcaddon.network.IssueCommandDevicePacket;
+import com.agent.sbwnpcaddon.network.SbwNetwork;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class CommandDeviceScreen extends Screen {
+    private final List<Integer> ids;
+    private final List<String> names;
+    private final List<Boolean> selected;
+
+    private EditBox xBox;
+    private EditBox yBox;
+    private EditBox zBox;
+
+    private EditBox pxBox;
+    private EditBox pyBox;
+    private EditBox pzBox;
+    private boolean patrolMode = false;
+
+    public CommandDeviceScreen(List<Integer> ids, List<String> names) {
+        super(Component.literal("Command Device"));
+        this.ids = ids;
+        this.names = names;
+        this.selected = new ArrayList<>();
+        for (int i = 0; i < ids.size(); i++) {
+            this.selected.add(false);
+        }
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        int cx = this.width / 2;
+        int cy = this.height / 2;
+
+        xBox = new EditBox(this.font, cx - 110, cy - 60, 60, 20, Component.empty());
+        yBox = new EditBox(this.font, cx - 40, cy - 60, 60, 20, Component.empty());
+        zBox = new EditBox(this.font, cx + 30, cy - 60, 60, 20, Component.empty());
+        this.addRenderableWidget(xBox);
+        this.addRenderableWidget(yBox);
+        this.addRenderableWidget(zBox);
+
+        pxBox = new EditBox(this.font, cx - 110, cy - 20, 60, 20, Component.empty());
+        pyBox = new EditBox(this.font, cx - 40, cy - 20, 60, 20, Component.empty());
+        pzBox = new EditBox(this.font, cx + 30, cy - 20, 60, 20, Component.empty());
+        this.addRenderableWidget(pxBox);
+        this.addRenderableWidget(pyBox);
+        this.addRenderableWidget(pzBox);
+
+        pxBox.visible = false;
+        pyBox.visible = false;
+        pzBox.visible = false;
+
+        this.addRenderableWidget(Button.builder(Component.literal("Mode: Move"), b -> {
+            patrolMode = !patrolMode;
+            b.setMessage(Component.literal(patrolMode ? "Mode: Patrol" : "Mode: Move"));
+            pxBox.visible = patrolMode;
+            pyBox.visible = patrolMode;
+            pzBox.visible = patrolMode;
+        }).bounds(cx + 100, cy - 60, 90, 20).build());
+
+        int listY = cy + 10;
+        for (int i = 0; i < names.size(); i++) {
+            final int index = i;
+            this.addRenderableWidget(Button.builder(Component.literal((selected.get(i) ? "[X] " : "[ ] ") + names.get(i)), b -> {
+                selected.set(index, !selected.get(index));
+                b.setMessage(Component.literal((selected.get(index) ? "[X] " : "[ ] ") + names.get(index)));
+            }).bounds(cx - 110, listY + i * 22, 200, 20).build());
+        }
+
+        this.addRenderableWidget(Button.builder(Component.literal("Execute"), b -> {
+            executeCommand();
+        }).bounds(cx + 100, cy + 10, 90, 20).build());
+    }
+
+    private void executeCommand() {
+        try {
+            double x = Double.parseDouble(xBox.getValue());
+            double y = Double.parseDouble(yBox.getValue());
+            double z = Double.parseDouble(zBox.getValue());
+
+            double px = x, py = y, pz = z;
+            if (patrolMode) {
+                px = Double.parseDouble(pxBox.getValue());
+                py = Double.parseDouble(pyBox.getValue());
+                pz = Double.parseDouble(pzBox.getValue());
+            }
+
+            List<Integer> selectedIds = new ArrayList<>();
+            for (int i = 0; i < ids.size(); i++) {
+                if (selected.get(i)) {
+                    selectedIds.add(ids.get(i));
+                }
+            }
+
+            if (!selectedIds.isEmpty()) {
+                SbwNetwork.CHANNEL.sendToServer(new IssueCommandDevicePacket(selectedIds, patrolMode, x, y, z, px, py, pz));
+            }
+            this.minecraft.setScreen(null);
+        } catch (Exception e) {
+            // invalid input
+        }
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(guiGraphics);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        int cx = this.width / 2;
+        int cy = this.height / 2;
+        guiGraphics.drawString(this.font, "Point A (X, Y, Z)", cx - 110, cy - 75, 0xFFFFFF, true);
+        if (patrolMode) {
+            guiGraphics.drawString(this.font, "Point B (X, Y, Z)", cx - 110, cy - 35, 0xFFFFFF, true);
+        }
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+}

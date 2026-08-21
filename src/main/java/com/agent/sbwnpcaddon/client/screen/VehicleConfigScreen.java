@@ -13,17 +13,24 @@ public class VehicleConfigScreen extends Screen {
     private final LivingEntity entity;
     
     private int type;
+    private int aircraftMode;
     private EditBox maxSpeedBox;
     private EditBox accelBox;
     private EditBox brakeBox;
     private EditBox turnRadBox;
     private boolean physicsEnabled;
+    private Button aircraftModeButton;
 
     public VehicleConfigScreen(LivingEntity entity) {
         super(Component.literal("Vehicle Configuration"));
         this.entity = entity;
         
         this.type = entity.getPersistentData().getInt("SbwVehicleType");
+        if (entity.getPersistentData().contains("SbwAircraftMode")) {
+            this.aircraftMode = entity.getPersistentData().getInt("SbwAircraftMode");
+        } else {
+            this.aircraftMode = (type == 3) ? 0 : 1;
+        }
         float ms = entity.getPersistentData().contains("SbwMaxSpeed") ? entity.getPersistentData().getFloat("SbwMaxSpeed") : 0.5f;
         float acc = entity.getPersistentData().contains("SbwAcceleration") ? entity.getPersistentData().getFloat("SbwAcceleration") : 0.005f;
         float brk = entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.02f;
@@ -67,7 +74,15 @@ public class VehicleConfigScreen extends Screen {
         this.addRenderableWidget(Button.builder(Component.literal(getTypeName()), b -> {
             type = (type + 1) % 4;
             b.setMessage(Component.literal(getTypeName()));
-        }).bounds(cx - 50, cy - 85, 100, 20).build());
+            updateAircraftModeButton();
+        }).bounds(cx - 155, cy - 85, 100, 20).build());
+        
+        // Aircraft Mode cycle button
+        aircraftModeButton = this.addRenderableWidget(Button.builder(Component.literal(getAircraftModeName()), b -> {
+            aircraftMode = (aircraftMode + 1) % 2;
+            b.setMessage(Component.literal(getAircraftModeName()));
+        }).bounds(cx + 55, cy - 85, 100, 20).build());
+        updateAircraftModeButton();
         
         // Physics toggle
         this.addRenderableWidget(Button.builder(Component.literal("Physics: " + (physicsEnabled ? "ON" : "OFF")), b -> {
@@ -97,7 +112,7 @@ public class VehicleConfigScreen extends Screen {
             float acc = Float.parseFloat(accelBox.getValue());
             float brk = Float.parseFloat(brakeBox.getValue());
             float tr = Float.parseFloat(turnRadBox.getValue());
-            SbwNetwork.CHANNEL.sendToServer(new SaveVehicleConfigPacket(entity.getId(), type, ms, acc, brk, tr, physicsEnabled, applyToAll));
+            SbwNetwork.CHANNEL.sendToServer(new SaveVehicleConfigPacket(entity.getId(), type, ms, acc, brk, tr, aircraftMode, physicsEnabled, applyToAll));
             this.minecraft.setScreen(null);
         } catch (Exception e) {
             // validation failed, don't save
@@ -108,10 +123,20 @@ public class VehicleConfigScreen extends Screen {
         return switch(type) {
             case 0 -> "Ground Vehicle";
             case 1 -> "Boat";
-            case 2 -> "Plane";
-            case 3 -> "Helicopter";
+            case 2 -> "Aircraft";
+            case 3 -> "Aircraft (Old Heli)";
             default -> "Ground Vehicle";
         };
+    }
+
+    private void updateAircraftModeButton() {
+        if (aircraftModeButton != null) {
+            aircraftModeButton.visible = (type == 2 || type == 3);
+        }
+    }
+
+    private String getAircraftModeName() {
+        return aircraftMode == 0 ? "Hover/Stationary" : "Runway Takeoff";
     }
 
     @Override

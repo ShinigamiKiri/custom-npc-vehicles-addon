@@ -26,7 +26,15 @@ public class VehicleMoveControl extends MoveControl {
             double dz = this.wantedZ - this.mob.getZ();
             double distanceSq = dx * dx + dz * dz;
 
-            if (distanceSq < 0.25) { // 0.5 blocks, matches vanilla pathfinder completion radius
+            int type = this.mob.getPersistentData().getInt("SbwVehicleType");
+            boolean isAircraft = (type == 2 || type == 3);
+
+            double dy = this.wantedY - this.mob.getY();
+            if (isAircraft) {
+                distanceSq += dy * dy;
+            }
+
+            if (distanceSq < (isAircraft ? 9.0 : 0.25)) { // 3 blocks for aircraft, 0.5 blocks for ground
                 this.forwardIntent = 0.0F;
                 this.sideIntent = 0.0F;
                 this.operation = Operation.WAIT; // Mark operation as done
@@ -39,8 +47,8 @@ public class VehicleMoveControl extends MoveControl {
             // Smooth proportional steering to eliminate oscillation
             this.sideIntent = Mth.clamp(yawDiff / 30.0F, -1.0F, 1.0F);
 
-            if (Math.abs(yawDiff) > 60.0F) {
-                this.forwardIntent = 0.3F; // slow down in tight turns
+            if (!isAircraft && Math.abs(yawDiff) > 60.0F) {
+                this.forwardIntent = 0.3F; // slow down in tight turns for ground vehicles
             } else {
                 this.forwardIntent = 1.0F;
             }

@@ -142,7 +142,12 @@ public class SbwPhysicsModule {
             // 4. One single authoritative piece of code that writes rotation
             updateEntityRotation(hullYaw, pitch, roll);
             
-        } else { // Plane (2) or Heli (3)
+        } else { // Aircraft (2=Plane, 3=Heli)
+            
+            boolean isHoverMode = (type == 3);
+            if (entity.getPersistentData().contains("SbwAircraftMode")) {
+                isHoverMode = (entity.getPersistentData().getInt("SbwAircraftMode") == 0);
+            }
             
             // Throttle controls forward target speed
             if (forwardInput > 0) {
@@ -156,7 +161,7 @@ public class SbwPhysicsModule {
                 if (currentSpeed < 0) currentSpeed = 0;
             } else {
                 brakeTicks = 0;
-                // Plane loses speed over time if no throttle
+                // Aircraft loses speed over time if no throttle
                 currentSpeed -= braking * 0.5;
                 if (currentSpeed < 0) currentSpeed = 0;
             }
@@ -165,14 +170,14 @@ public class SbwPhysicsModule {
             float targetRoll = 0.0f;
             float targetYawRate = 0.0f;
 
-            if (type == 3) { // Helicopter
+            if (isHoverMode) { // Hover/Stationary Mode (Helicopter/VTOL)
                 // Helicopters can hover and turn freely
                 float maxTurnRate = Math.min(turnRadius, 5.0f);
                 targetYawRate = sideInput * maxTurnRate;
                 
                 targetPitch = forwardInput * 20.0f;
                 targetRoll = sideInput * -20.0f;
-            } else { // Plane
+            } else { // Runway Takeoff Mode (Plane)
                 // Planes MUST have forward airspeed to turn effectively
                 float maxTurnRate = Math.min(turnRadius, 3.0f);
                 // Turn rate depends on speed and sideInput
@@ -184,10 +189,15 @@ public class SbwPhysicsModule {
                 // Add pitch based on wanting to climb/dive if guided by MoveControl
                 if (entity.getMoveControl() instanceof VehicleMoveControl vmc) {
                      if (vmc.wantedY > entity.getY() + 1) {
-                         targetPitch = -20.0f * speedRatio;
+                         targetPitch = -20.0f * speedRatio; // Pitch up
                      } else if (vmc.wantedY < entity.getY() - 1) {
-                         targetPitch = 20.0f * speedRatio;
+                         targetPitch = 20.0f * speedRatio; // Pitch down
                      }
+                }
+                // If we are above takeoff speed but on the ground and want to go up, force pitch up
+                float stallSpeedSq = maxSpeed * maxSpeed * 0.3f;
+                if (currentSpeed * currentSpeed >= stallSpeedSq && entity.onGround() && entity.getMoveControl() instanceof VehicleMoveControl vmc && vmc.wantedY > entity.getY()) {
+                     targetPitch = -20.0f; 
                 }
             }
             
@@ -209,14 +219,14 @@ public class SbwPhysicsModule {
             double targetVelZ = forwardVec.z * currentSpeed;
             
             // Aerodynamic momentum correction / slip factor
-            float aeroBlend = (type == 3) ? 0.9f : 0.05f; // Helis are snappy, planes drift and smoothly blend
+            float aeroBlend = isHoverMode ? 0.9f : 0.05f; // Helis are snappy, planes drift and smoothly blend
             actualVelX += (targetVelX - actualVelX) * aeroBlend;
             actualVelZ += (targetVelZ - actualVelZ) * aeroBlend;
             
             // Lift mechanics
             float gravity = 0.08f;
             
-            if (type == 2) { // Plane Lift
+            if (!isHoverMode) { // Plane Lift
                 float stallSpeedSq = maxSpeed * maxSpeed * 0.3f; // Stall threshold (~55% max speed)
                 float speedSquared = (float) (currentSpeed * currentSpeed);
                 
@@ -235,12 +245,17 @@ public class SbwPhysicsModule {
                     
                     // Climb/dive is now dictated purely by engine pitch (targetVelY)
                     actualVelY += (targetVelY - actualVelY) * aeroBlend;
+                    
+                    // If pitch is forcing us up, ensure positive actualVelY
+                    if (targetVelY > 0 && actualVelY < targetVelY) {
+                        actualVelY += (targetVelY - actualVelY) * 0.1f;
+                    }
                 }
                 
                 // Apply vertical drag/damping so we don't infinitely accelerate upwards/downwards
                 actualVelY *= 0.90;
                 
-            } else if (type == 3) { // Helicopter Lift
+            } else { // Helicopter Lift
                 // Helicopters use engine thrust directly as lift
                 if (entity.getMoveControl() instanceof VehicleMoveControl vmc) {
                     if (vmc.wantedY > entity.getY() + 0.5) {
@@ -258,6 +273,7 @@ public class SbwPhysicsModule {
             }
             
             velocity = new Vec3(actualVelX, actualVelY, actualVelZ);
+            entity.setMaxUpStep(1.0f); // Allow planes/helis to taxi over small bumps without horizontal collision stopping them
             entity.move(net.minecraft.world.entity.MoverType.SELF, velocity);
             
             Vec3 postMove = entity.getDeltaMovement();

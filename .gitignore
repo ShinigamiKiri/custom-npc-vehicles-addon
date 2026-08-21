@@ -19,3 +19,6 @@ bin/
 # Do not ignore libs directory since we need the local dependencies
 !libs/
 !libs/*.jar
+
+gradle-8.1.1-bin.zip
+gradle-8.1.1/

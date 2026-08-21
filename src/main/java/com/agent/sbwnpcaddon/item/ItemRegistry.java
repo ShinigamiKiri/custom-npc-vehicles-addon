@@ -12,6 +12,9 @@ public class ItemRegistry {
     public static final RegistryObject<Item> VEHICLE_CONFIG_TOOL = ITEMS.register("vehicle_config_tool",
             () -> new VehicleConfigTool(new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> COMMAND_DEVICE = ITEMS.register("command_device",
+            () -> new CommandDeviceItem(new Item.Properties().stacksTo(1)));
+
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
     }

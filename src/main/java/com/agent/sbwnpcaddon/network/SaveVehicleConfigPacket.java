@@ -18,16 +18,18 @@ public class SaveVehicleConfigPacket {
     private final float acceleration;
     private final float braking;
     private final float turnRadius;
+    private final int aircraftMode;
     private final boolean physicsEnabled;
     private final boolean applyToAllClones;
 
-    public SaveVehicleConfigPacket(int entityId, int type, float maxSpeed, float acceleration, float braking, float turnRadius, boolean physicsEnabled, boolean applyToAllClones) {
+    public SaveVehicleConfigPacket(int entityId, int type, float maxSpeed, float acceleration, float braking, float turnRadius, int aircraftMode, boolean physicsEnabled, boolean applyToAllClones) {
         this.entityId = entityId;
         this.type = type;
         this.maxSpeed = maxSpeed;
         this.acceleration = acceleration;
         this.braking = braking;
         this.turnRadius = turnRadius;
+        this.aircraftMode = aircraftMode;
         this.physicsEnabled = physicsEnabled;
         this.applyToAllClones = applyToAllClones;
     }
@@ -39,6 +41,7 @@ public class SaveVehicleConfigPacket {
         this.acceleration = buf.readFloat();
         this.braking = buf.readFloat();
         this.turnRadius = buf.readFloat();
+        this.aircraftMode = buf.readInt();
         this.physicsEnabled = buf.readBoolean();
         this.applyToAllClones = buf.readBoolean();
     }
@@ -50,6 +53,7 @@ public class SaveVehicleConfigPacket {
         buf.writeFloat(acceleration);
         buf.writeFloat(braking);
         buf.writeFloat(turnRadius);
+        buf.writeInt(aircraftMode);
         buf.writeBoolean(physicsEnabled);
         buf.writeBoolean(applyToAllClones);
     }
@@ -96,6 +100,7 @@ public class SaveVehicleConfigPacket {
         mob.getPersistentData().putFloat("SbwAcceleration", acceleration);
         mob.getPersistentData().putFloat("SbwBraking", braking);
         mob.getPersistentData().putFloat("SbwTurnRadius", turnRadius);
+        mob.getPersistentData().putInt("SbwAircraftMode", aircraftMode);
         mob.getPersistentData().putBoolean("SbwPhysicsEnabled", physicsEnabled);
 
         if (physicsEnabled) {
