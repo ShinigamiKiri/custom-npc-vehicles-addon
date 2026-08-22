@@ -80,6 +80,7 @@ public class SbwNpcAddonMod {
         var entity = event.getEntity();
         if (entity instanceof net.minecraft.world.entity.Mob mob) {
             com.agent.sbwnpcaddon.entity.ai.CommandDeviceHelper.ensureCommandRestored(mob);
+            com.agent.sbwnpcaddon.world.ChunkLoadManager.maintainChunkLoading(mob);
         }
 
         if (entity.getPersistentData().getBoolean("SbwPhysicsEnabled") && entity instanceof net.minecraft.world.entity.Mob mob) {
