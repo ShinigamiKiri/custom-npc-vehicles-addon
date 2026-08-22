@@ -16,9 +16,7 @@ jobs:
         run: |
           cd sbw_npc_addon
           chmod +x gradlew
-          ./gradlew build > ../compile_error.txt 2>&1 || true
-      - name: Commit Error
-        run: |
+          ./gradlew build > compile_error.txt 2>&1 || true
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add compile_error.txt
