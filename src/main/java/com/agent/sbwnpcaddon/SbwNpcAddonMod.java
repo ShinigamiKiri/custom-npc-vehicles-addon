@@ -126,8 +126,8 @@ public class SbwNpcAddonMod {
 
         // 2. Owner Assist: Follow/Guard mode NPCs assist owner's attacks
         // event.getSource().getEntity() gets the true source (shooter/attacker), handling TACZ and vanilla projectiles
-        var sourceEntity = event.getSource().getEntity();
-        if (sourceEntity instanceof net.minecraft.world.entity.player.Player player && !entity.level().isClientSide) {
+        var trueSource = event.getSource().getEntity();
+        if (trueSource instanceof net.minecraft.world.entity.player.Player player && !entity.level().isClientSide) {
             if (entity instanceof net.minecraft.world.entity.LivingEntity victim && victim.isAlive()) {
                 double assistRadius = 48.0; // Tunable constant for assist range
                 java.util.List<net.minecraft.world.entity.Mob> nearbyMobs = player.level().getEntitiesOfClass(
@@ -144,8 +144,7 @@ public class SbwNpcAddonMod {
                                 Object owner = getOwner.invoke(assistMob);
                                 if (owner instanceof net.minecraft.world.entity.Entity o && o.getUUID().equals(player.getUUID())) {
                                     // Respect vanilla/CustomNPCs faction target validity before forcing
-                                    // isAlliedTo and canAttack are standard methods often overridden by Custom NPCs for factions
-                                    if (!assistMob.isAlliedTo(victim) && assistMob.canAttack(victim) && victim != assistMob && victim != player) {
+                                    if (!assistMob.isAlliedTo(victim) && victim != assistMob && victim != player) {
                                         assistMob.setTarget(victim);
                                     }
                                 }
