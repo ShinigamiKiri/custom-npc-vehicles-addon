@@ -128,7 +128,7 @@ public class SbwNpcAddonMod {
         // event.getSource().getEntity() gets the true source (shooter/attacker), handling TACZ and vanilla projectiles
         var trueSource = event.getSource().getEntity();
         if (trueSource instanceof net.minecraft.world.entity.player.Player player && !entity.level().isClientSide) {
-            if (entity instanceof net.minecraft.world.entity.LivingEntity victim && victim.isAlive()) {
+            if (entity.isAlive()) {
                 double assistRadius = 48.0; // Tunable constant for assist range
                 java.util.List<net.minecraft.world.entity.Mob> nearbyMobs = player.level().getEntitiesOfClass(
                     net.minecraft.world.entity.Mob.class, 
@@ -144,8 +144,8 @@ public class SbwNpcAddonMod {
                                 Object owner = getOwner.invoke(assistMob);
                                 if (owner instanceof net.minecraft.world.entity.Entity o && o.getUUID().equals(player.getUUID())) {
                                     // Respect vanilla/CustomNPCs faction target validity before forcing
-                                    if (!assistMob.isAlliedTo(victim) && victim != assistMob && victim != player) {
-                                        assistMob.setTarget(victim);
+                                    if (!assistMob.isAlliedTo(entity) && assistMob.canAttack(entity) && entity != assistMob && entity != player) {
+                                        assistMob.setTarget(entity);
                                     }
                                 }
                             } catch (Exception ignored) {
