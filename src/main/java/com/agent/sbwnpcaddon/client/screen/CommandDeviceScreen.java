@@ -1,6 +1,7 @@
 package com.agent.sbwnpcaddon.client.screen;
 
 import com.agent.sbwnpcaddon.network.IssueCommandDevicePacket;
+import com.agent.sbwnpcaddon.network.UpdateCombatPresetPacket;
 import com.agent.sbwnpcaddon.network.SbwNetwork;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -14,6 +15,7 @@ import java.util.List;
 public class CommandDeviceScreen extends Screen {
     private final List<Integer> ids;
     private final List<String> names;
+    private final List<Integer> presets;
     private final List<Boolean> selected;
 
     private EditBox xBox;
@@ -26,11 +28,13 @@ public class CommandDeviceScreen extends Screen {
     
     private int mode = 2; // Default to Move
     private String[] modeNames = new String[] {"Follow", "Stay / Guard", "Move", "Patrol"};
+    private String[] presetNames = new String[] {"", "Preset 1: Proximity", "Preset 2: Retaliate", "Preset 3: Tank"};
 
-    public CommandDeviceScreen(List<Integer> ids, List<String> names) {
+    public CommandDeviceScreen(List<Integer> ids, List<String> names, List<Integer> presets) {
         super(Component.literal("Command Device"));
         this.ids = ids;
         this.names = names;
+        this.presets = presets;
         this.selected = new ArrayList<>();
         for (int i = 0; i < ids.size(); i++) {
             this.selected.add(false);
@@ -68,10 +72,25 @@ public class CommandDeviceScreen extends Screen {
         int listY = cy + 10;
         for (int i = 0; i < names.size(); i++) {
             final int index = i;
+            
+            // Selection Button
             this.addRenderableWidget(Button.builder(Component.literal((selected.get(i) ? "[X] " : "[ ] ") + names.get(i)), b -> {
                 selected.set(index, !selected.get(index));
                 b.setMessage(Component.literal((selected.get(index) ? "[X] " : "[ ] ") + names.get(index)));
-            }).bounds(cx - 110, listY + i * 22, 200, 20).build());
+            }).bounds(cx - 150, listY + i * 22, 160, 20).build());
+            
+            // Preset Toggle Button
+            int initialPreset = presets.get(i) >= 1 && presets.get(i) <= 3 ? presets.get(i) : 1;
+            this.addRenderableWidget(Button.builder(Component.literal(presetNames[initialPreset]), b -> {
+                int current = presets.get(index);
+                current = current >= 3 ? 1 : current + 1;
+                presets.set(index, current);
+                b.setMessage(Component.literal(presetNames[current]));
+                
+                // Immediately send update to server
+                SbwNetwork.CHANNEL.sendToServer(new UpdateCombatPresetPacket(ids.get(index), current));
+                
+            }).bounds(cx + 15, listY + i * 22, 130, 20).build());
         }
 
         this.addRenderableWidget(Button.builder(Component.literal("Execute Command"), b -> {

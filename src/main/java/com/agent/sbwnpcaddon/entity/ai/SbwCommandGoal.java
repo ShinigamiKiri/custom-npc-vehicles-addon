@@ -4,6 +4,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.EnumSet;
 
@@ -16,6 +17,13 @@ public class SbwCommandGoal extends Goal {
     private boolean towardsPointB = false;
     
     private int followTeleportCooldown = 0;
+    
+    // Combat State Tracking for Presets
+    private boolean yieldedForCombat = false;
+    private int combatTickCounter = 0;
+    private double lastCombatX, lastCombatY, lastCombatZ;
+    private int stationaryTicks = 0;
+    private static final int MAX_COMBAT_TICKS = 15 * 20; // 15 seconds tunable
 
     public SbwCommandGoal(Mob mob) {
         this.mob = mob;
@@ -28,8 +36,8 @@ public class SbwCommandGoal extends Goal {
         this.x1 = x1; this.y1 = y1; this.z1 = z1;
         this.x2 = x2; this.y2 = y2; this.z2 = z2;
         this.towardsPointB = false;
+        this.yieldedForCombat = false;
         if (mode == 1 || mode == 4) {
-            // For Stay and Guard, set current position as the stay point
             this.x1 = mob.getX();
             this.y1 = mob.getY();
             this.z1 = mob.getZ();
@@ -38,6 +46,7 @@ public class SbwCommandGoal extends Goal {
 
     public void deactivate() {
         this.active = false;
+        this.yieldedForCombat = false;
         mob.getNavigation().stop();
         if (mob.getMoveControl() instanceof com.agent.sbwnpcaddon.entity.physics.VehicleMoveControl vmc) {
             vmc.forwardIntent = 0.0F;
@@ -45,39 +54,119 @@ public class SbwCommandGoal extends Goal {
         }
     }
 
+    private boolean shouldYieldToCombat() {
+        if (mode == 1) return false; // Preset logic doesn't override Stay (mode 1). Stay never yields movement. Wait, Stay = Mode 1, Guard = Mode 4. The user said: "only Stay is intended to not actively pursue/engage". So Stay NEVER yields.
+        
+        LivingEntity target = mob.getTarget();
+        if (target == null || !target.isAlive()) return false;
+        
+        int preset = mob.getPersistentData().contains("SbwCombatPreset") ? mob.getPersistentData().getInt("SbwCombatPreset") : 1;
+        
+        if (preset == 1) { // Proximity Engage
+            return mob.distanceToSqr(target) <= 100.0; // 10 blocks squared
+        } else if (preset == 2) { // Retaliate on Aggro
+            LivingEntity targetOfTarget = null;
+            if (target instanceof Mob m) {
+                targetOfTarget = m.getTarget();
+            } else if (target instanceof net.minecraft.world.entity.monster.Creeper) {
+                targetOfTarget = ((net.minecraft.world.entity.monster.Creeper)target).getTarget();
+            }
+            return targetOfTarget == mob;
+        } else if (preset == 3) { // Self-Defense Only (Tank)
+            return false; // Never proactively yields MOVE
+        }
+        
+        return false;
+    }
+
     @Override
     public boolean canUse() {
         if (!active) return false;
-        return true;
+
+        if (mode == 1) return true; // Stay mode never yields
+
+        if (yieldedForCombat) {
+            LivingEntity target = mob.getTarget();
+            if (target == null || !target.isAlive()) {
+                yieldedForCombat = false;
+                return true; // Target lost/dead, reclaim MOVE
+            }
+
+            int preset = mob.getPersistentData().contains("SbwCombatPreset") ? mob.getPersistentData().getInt("SbwCombatPreset") : 1;
+            
+            if (preset == 1) {
+                combatTickCounter++;
+                double distMovedSq = mob.distanceToSqr(lastCombatX, lastCombatY, lastCombatZ);
+                if (distMovedSq < 1.0) {
+                    stationaryTicks++;
+                } else {
+                    stationaryTicks = 0;
+                    lastCombatX = mob.getX();
+                    lastCombatY = mob.getY();
+                    lastCombatZ = mob.getZ();
+                }
+
+                if (combatTickCounter > MAX_COMBAT_TICKS || stationaryTicks > MAX_COMBAT_TICKS) {
+                    // Forcibly abandon fight
+                    mob.setTarget(null); // Clear target so native attack stops
+                    yieldedForCombat = false;
+                    return true;
+                }
+            } else if (preset == 2) {
+                // If the target stops targeting us, reclaim MOVE
+                LivingEntity targetOfTarget = (target instanceof Mob m) ? m.getTarget() : null;
+                if (targetOfTarget != mob) {
+                    mob.setTarget(null);
+                    yieldedForCombat = false;
+                    return true;
+                }
+            }
+            
+            return false; // Continue yielding
+        } else {
+            if (shouldYieldToCombat()) {
+                yieldedForCombat = true;
+                combatTickCounter = 0;
+                stationaryTicks = 0;
+                lastCombatX = mob.getX();
+                lastCombatY = mob.getY();
+                lastCombatZ = mob.getZ();
+                return false; // Yield now
+            }
+            return true;
+        }
     }
 
     @Override
     public boolean canContinueToUse() {
-        return active;
+        return canUse();
     }
 
     @Override
     public void start() {
-        navigate();
+        if (!yieldedForCombat) {
+            navigate();
+        }
     }
 
     @Override
     public void tick() {
+        if (yieldedForCombat) return;
+
         if (mode == 0) { // Follow
             Player owner = getOwner();
             if (owner != null) {
                 double distSq = mob.distanceToSqr(owner);
                 if (followTeleportCooldown > 0) followTeleportCooldown--;
                 
-                // If extremely far or different dimension, teleport (fallback safety)
-                if (owner.level() != mob.level() || distSq > 40000.0) { // 200 blocks
+                if (owner.level() != mob.level() || distSq > 40000.0) {
                     if (followTeleportCooldown <= 0) {
                         mob.teleportTo(owner.getX(), owner.getY(), owner.getZ());
                         followTeleportCooldown = 100;
                     }
-                } else if (distSq > 64.0) { // More than 8 blocks away
+                } else if (distSq > 64.0) {
                     mob.getNavigation().moveTo(owner, 1.0D);
-                } else if (distSq < 16.0) { // Closer than 4 blocks
+                } else if (distSq < 16.0) {
                     mob.getNavigation().stop();
                 }
             }
@@ -87,19 +176,16 @@ public class SbwCommandGoal extends Goal {
             boolean isPlane = (type == 2 || type == 3) && mob.getPersistentData().getInt("SbwAircraftMode") == 1;
             
             if (isPlane) {
-                // Loiter behavior for planes
-                if (distSq > 900.0) { // Further than 30 blocks from anchor, fly back to it
+                if (distSq > 900.0) {
                     mob.getNavigation().moveTo(x1, y1, z1, 1.0D);
                 } else {
-                    // Inside loiter radius, circle it
                     mob.getNavigation().stop();
                     if (mob.getMoveControl() instanceof com.agent.sbwnpcaddon.entity.physics.VehicleMoveControl vmc) {
                         vmc.forwardIntent = 1.0F;
-                        vmc.sideIntent = 0.5F; // gentle turn to circle
+                        vmc.sideIntent = 0.5F;
                     }
                 }
             } else {
-                // Ground / Heli stay exactly
                 if (distSq > 4.0) {
                     mob.getNavigation().moveTo(x1, y1, z1, 1.0D);
                 } else {
@@ -117,11 +203,10 @@ public class SbwCommandGoal extends Goal {
 
             double distSq = mob.distanceToSqr(targetX, targetY, targetZ);
             if (distSq < (isAircraft() ? 25.0 : 4.0)) {
-                if (mode == 3) { // Patrol
+                if (mode == 3) {
                     towardsPointB = !towardsPointB;
                     navigate();
-                } else { // Move
-                    // Reached destination, turn into Stay mode
+                } else {
                     mode = 1;
                     this.x1 = targetX; this.y1 = targetY; this.z1 = targetZ;
                 }
@@ -147,7 +232,9 @@ public class SbwCommandGoal extends Goal {
 
     @Override
     public void stop() {
-        mob.getNavigation().stop();
+        if (!yieldedForCombat) {
+            mob.getNavigation().stop();
+        }
     }
 
     private Player getOwner() {

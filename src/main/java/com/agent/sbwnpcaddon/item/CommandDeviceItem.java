@@ -17,6 +17,7 @@ public class CommandDeviceItem extends Item {
         if (!level.isClientSide) {
             java.util.List<Integer> ids = new java.util.ArrayList<>();
             java.util.List<String> names = new java.util.ArrayList<>();
+            java.util.List<Integer> presets = new java.util.ArrayList<>();
             
             for (net.minecraft.world.entity.Entity e : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, player.getBoundingBox().inflate(64.0))) {
                 try {
@@ -28,6 +29,8 @@ public class CommandDeviceItem extends Item {
                         if (following) {
                             ids.add(e.getId());
                             names.add(e.getDisplayName().getString());
+                            int preset = e.getPersistentData().contains("SbwCombatPreset") ? e.getPersistentData().getInt("SbwCombatPreset") : 1;
+                            presets.add(preset);
                         }
                     }
                 } catch (Exception ex) {
@@ -37,7 +40,7 @@ public class CommandDeviceItem extends Item {
             
             com.agent.sbwnpcaddon.network.SbwNetwork.CHANNEL.send(
                 net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> (net.minecraft.server.level.ServerPlayer) player),
-                new com.agent.sbwnpcaddon.network.OpenCommandDeviceGuiPacket(ids, names)
+                new com.agent.sbwnpcaddon.network.OpenCommandDeviceGuiPacket(ids, names, presets)
             );
         }
         return InteractionResultHolder.sidedSuccess(player.getItemInHand(hand), level.isClientSide());

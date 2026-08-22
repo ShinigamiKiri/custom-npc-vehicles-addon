@@ -28,6 +28,7 @@ public class SbwNpcAddonMod {
         com.agent.sbwnpcaddon.menu.MenuRegistry.register(modEventBus);
         
         MinecraftForge.EVENT_BUS.addListener(this::onLivingTick);
+        MinecraftForge.EVENT_BUS.addListener(this::onLivingHurt);
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onEntityInteract);
         MinecraftForge.EVENT_BUS.addListener(EventPriority.HIGHEST, this::onEntityInteractSpecific);
         
@@ -99,6 +100,28 @@ public class SbwNpcAddonMod {
                 VehicleConfigTool.physicsModules.put(mob, module);
             }
             module.tick(); 
+        }
+    }
+
+    private void onLivingHurt(net.minecraftforge.event.entity.living.LivingHurtEvent event) {
+        var entity = event.getEntity();
+        if (!entity.level().isClientSide() && entity instanceof net.minecraft.world.entity.Mob mob) {
+            if (mob.getPersistentData().getBoolean("SbwCommandActive")) {
+                int preset = mob.getPersistentData().contains("SbwCombatPreset") ? mob.getPersistentData().getInt("SbwCombatPreset") : 1;
+                if (preset == 3) {
+                    var sourceEntity = event.getSource().getEntity();
+                    if (sourceEntity instanceof net.minecraft.world.entity.LivingEntity attacker) {
+                        // Reflexive self-defense: shoot or hit the attacker without stopping movement
+                        mob.getLookControl().setLookAt(attacker, 30.0F, 30.0F);
+                        if (mob.distanceToSqr(attacker) < 16.0) {
+                            mob.doHurtTarget(attacker);
+                        } else if (mob instanceof net.minecraft.world.entity.monster.RangedAttackMob ranged) {
+                            // Custom NPCs implements RangedAttackMob, so we can trigger a shot
+                            ranged.performRangedAttack(attacker, 1.0f);
+                        }
+                    }
+                }
+            }
         }
     }
 }

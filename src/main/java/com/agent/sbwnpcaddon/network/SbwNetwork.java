@@ -20,5 +20,6 @@ public class SbwNetwork {
         CHANNEL.registerMessage(id++, OpenCommandDeviceGuiPacket.class, OpenCommandDeviceGuiPacket::toBytes, OpenCommandDeviceGuiPacket::new, OpenCommandDeviceGuiPacket::handle);
         CHANNEL.registerMessage(id++, IssueCommandDevicePacket.class, IssueCommandDevicePacket::toBytes, IssueCommandDevicePacket::new, IssueCommandDevicePacket::handle);
         CHANNEL.registerMessage(id++, TradeCompletePacket.class, TradeCompletePacket::toBytes, TradeCompletePacket::new, TradeCompletePacket::handle);
+        CHANNEL.registerMessage(id++, UpdateCombatPresetPacket.class, UpdateCombatPresetPacket::toBytes, UpdateCombatPresetPacket::new, UpdateCombatPresetPacket::handle);
     }
 }

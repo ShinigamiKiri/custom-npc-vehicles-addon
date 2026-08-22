@@ -1,12 +1,10 @@
 package com.agent.sbwnpcaddon.client;
 
-import com.agent.sbwnpcaddon.client.screen.CommandDeviceScreen;
 import net.minecraft.client.Minecraft;
-
 import java.util.List;
 
 public class ClientHelper {
-    public static void openCommandDeviceScreen(List<Integer> ids, List<String> names) {
-        Minecraft.getInstance().setScreen(new CommandDeviceScreen(ids, names));
+    public static void openCommandDeviceScreen(List<Integer> ids, List<String> names, List<Integer> presets) {
+        Minecraft.getInstance().setScreen(new com.agent.sbwnpcaddon.client.screen.CommandDeviceScreen(ids, names, presets));
     }
 }
