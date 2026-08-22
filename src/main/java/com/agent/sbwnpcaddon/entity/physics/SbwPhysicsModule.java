@@ -57,6 +57,12 @@ public class SbwPhysicsModule {
             sideInput = vmc.sideIntent;
         }
 
+        // Neutralize native speed attribute to prevent Custom NPCs from moving the entity concurrently
+        var moveAttr = entity.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED);
+        if (moveAttr != null) {
+            moveAttr.setBaseValue(0.0);
+        }
+
         float speedRatio = (float) (Math.abs(currentSpeed) / maxSpeed);
         speedRatio = Mth.clamp(speedRatio, 0.0f, 1.0f);
 
@@ -139,6 +145,11 @@ public class SbwPhysicsModule {
             pitch += (targetPitch - pitch) * 0.15f;
             roll += (targetRoll - roll) * 0.15f;
             
+            if (forwardInput == 0 && sideInput == 0 && Math.abs(currentSpeed) < 0.01) {
+                actualVelX = 0;
+                actualVelZ = 0;
+            }
+
             // 4. One single authoritative piece of code that writes rotation
             updateEntityRotation(hullYaw, pitch, roll);
             
@@ -223,6 +234,11 @@ public class SbwPhysicsModule {
             actualVelX += (targetVelX - actualVelX) * aeroBlend;
             actualVelZ += (targetVelZ - actualVelZ) * aeroBlend;
             
+            if (forwardInput == 0 && sideInput == 0 && Math.abs(currentSpeed) < 0.01) {
+                actualVelX = 0;
+                actualVelZ = 0;
+            }
+
             // Lift mechanics
             float gravity = 0.08f;
             

@@ -19,21 +19,19 @@ public class CommandDeviceItem extends Item {
             java.util.List<String> names = new java.util.ArrayList<>();
             
             for (net.minecraft.world.entity.Entity e : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, player.getBoundingBox().inflate(64.0))) {
-                if (e.getClass().getName().equals("noppes.npcs.entity.EntityCustomNpc")) {
-                    try {
-                        java.lang.reflect.Method getOwner = e.getClass().getMethod("getOwner");
-                        Object owner = getOwner.invoke(e);
-                        if (owner == player) {
-                            java.lang.reflect.Method isFollower = e.getClass().getMethod("isFollower");
-                            boolean following = (boolean) isFollower.invoke(e);
-                            if (following) {
-                                ids.add(e.getId());
-                                names.add(e.getDisplayName().getString());
-                            }
+                try {
+                    java.lang.reflect.Method getOwner = e.getClass().getMethod("getOwner");
+                    Object owner = getOwner.invoke(e);
+                    if (owner instanceof net.minecraft.world.entity.Entity && ((net.minecraft.world.entity.Entity) owner).getUUID().equals(player.getUUID())) {
+                        java.lang.reflect.Method isFollower = e.getClass().getMethod("isFollower");
+                        boolean following = (boolean) isFollower.invoke(e);
+                        if (following) {
+                            ids.add(e.getId());
+                            names.add(e.getDisplayName().getString());
                         }
-                    } catch (Exception ex) {
-                        // ignore
                     }
+                } catch (Exception ex) {
+                    // ignore
                 }
             }
             

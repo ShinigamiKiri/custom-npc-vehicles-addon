@@ -29,6 +29,14 @@ public class VehicleMoveControl extends MoveControl {
             int type = this.mob.getPersistentData().getInt("SbwVehicleType");
             boolean isAircraft = (type == 2 || type == 3);
 
+            if (isAircraft) {
+                int groundY = this.mob.level().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, (int)this.wantedX, (int)this.wantedZ);
+                double cruisingAlt = groundY + 15.0;
+                if (this.wantedY < cruisingAlt) {
+                    this.wantedY = cruisingAlt;
+                }
+            }
+
             double dy = this.wantedY - this.mob.getY();
             if (isAircraft) {
                 distanceSq += dy * dy;
@@ -53,8 +61,16 @@ public class VehicleMoveControl extends MoveControl {
                 this.forwardIntent = 1.0F;
             }
         } else {
-            this.forwardIntent = 0.0F;
-            this.sideIntent = 0.0F;
+            int type = this.mob.getPersistentData().getInt("SbwVehicleType");
+            boolean isPlane = (type == 2 || type == 3) && this.mob.getPersistentData().getInt("SbwAircraftMode") == 1;
+            
+            if (isPlane && this.mob.getTarget() != null && !this.mob.onGround()) {
+                this.forwardIntent = 1.0F;
+                this.sideIntent = 0.5F;
+            } else {
+                this.forwardIntent = 0.0F;
+                this.sideIntent = 0.0F;
+            }
         }
     }
 }
