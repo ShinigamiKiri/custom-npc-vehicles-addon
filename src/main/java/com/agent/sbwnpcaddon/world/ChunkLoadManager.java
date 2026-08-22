@@ -31,8 +31,23 @@ public class ChunkLoadManager {
     public static void maintainChunkLoading(Mob mob) {
         if (mob.level().isClientSide || !(mob.level() instanceof ServerLevel serverLevel)) return;
 
+        boolean hasActiveMove = false;
+        if (mob.getPersistentData().getBoolean("SbwCommandActive")) {
+            int mode = mob.getPersistentData().getInt("SbwCommandMode");
+            if (mode == 2 || mode == 3) {
+                hasActiveMove = true;
+            }
+        }
+
         UUID uuid = mob.getUUID();
         Set<ChunkPos> loadedChunks = activeNpcs.get(uuid);
+
+        if (!hasActiveMove) {
+            if (loadedChunks != null) {
+                releaseAllForUUID(serverLevel, uuid);
+            }
+            return;
+        }
 
         // If this NPC is not yet tracked, check if we have capacity
         if (loadedChunks == null) {
