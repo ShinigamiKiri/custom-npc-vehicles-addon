@@ -23,7 +23,9 @@ public class CommandDeviceScreen extends Screen {
     private EditBox pxBox;
     private EditBox pyBox;
     private EditBox pzBox;
-    private boolean patrolMode = false;
+    
+    private int mode = 2; // Default to Move
+    private String[] modeNames = new String[] {"Follow", "Stay / Guard", "Move", "Patrol"};
 
     public CommandDeviceScreen(List<Integer> ids, List<String> names) {
         super(Component.literal("Command Device"));
@@ -55,17 +57,13 @@ public class CommandDeviceScreen extends Screen {
         this.addRenderableWidget(pyBox);
         this.addRenderableWidget(pzBox);
 
-        pxBox.visible = false;
-        pyBox.visible = false;
-        pzBox.visible = false;
+        updateVisibility();
 
-        this.addRenderableWidget(Button.builder(Component.literal("Mode: Move"), b -> {
-            patrolMode = !patrolMode;
-            b.setMessage(Component.literal(patrolMode ? "Mode: Patrol" : "Mode: Move"));
-            pxBox.visible = patrolMode;
-            pyBox.visible = patrolMode;
-            pzBox.visible = patrolMode;
-        }).bounds(cx + 100, cy - 60, 90, 20).build());
+        this.addRenderableWidget(Button.builder(Component.literal("Mode: " + modeNames[mode]), b -> {
+            mode = (mode + 1) % modeNames.length;
+            b.setMessage(Component.literal("Mode: " + modeNames[mode]));
+            updateVisibility();
+        }).bounds(cx + 100, cy - 60, 110, 20).build());
 
         int listY = cy + 10;
         for (int i = 0; i < names.size(); i++) {
@@ -80,9 +78,20 @@ public class CommandDeviceScreen extends Screen {
             executeCommand(false);
         }).bounds(cx + 100, cy + 10, 110, 20).build());
         
-        this.addRenderableWidget(Button.builder(Component.literal("Cancel Command / Resume Follow"), b -> {
+        this.addRenderableWidget(Button.builder(Component.literal("Cancel / Reset To Default"), b -> {
             executeCommand(true);
         }).bounds(cx + 100, cy + 35, 180, 20).build());
+    }
+
+    private void updateVisibility() {
+        boolean needsPointA = (mode == 2 || mode == 3);
+        boolean needsPointB = (mode == 3);
+        xBox.visible = needsPointA;
+        yBox.visible = needsPointA;
+        zBox.visible = needsPointA;
+        pxBox.visible = needsPointB;
+        pyBox.visible = needsPointB;
+        pzBox.visible = needsPointB;
     }
 
     private void executeCommand(boolean cancel) {
@@ -91,12 +100,13 @@ public class CommandDeviceScreen extends Screen {
             double px = 0, py = 0, pz = 0;
             
             if (!cancel) {
-                x = Double.parseDouble(xBox.getValue());
-                y = Double.parseDouble(yBox.getValue());
-                z = Double.parseDouble(zBox.getValue());
-
+                if (mode == 2 || mode == 3) {
+                    x = Double.parseDouble(xBox.getValue());
+                    y = Double.parseDouble(yBox.getValue());
+                    z = Double.parseDouble(zBox.getValue());
+                }
                 px = x; py = y; pz = z;
-                if (patrolMode) {
+                if (mode == 3) {
                     px = Double.parseDouble(pxBox.getValue());
                     py = Double.parseDouble(pyBox.getValue());
                     pz = Double.parseDouble(pzBox.getValue());
@@ -111,7 +121,7 @@ public class CommandDeviceScreen extends Screen {
             }
 
             if (!selectedIds.isEmpty()) {
-                SbwNetwork.CHANNEL.sendToServer(new IssueCommandDevicePacket(selectedIds, cancel, patrolMode, x, y, z, px, py, pz));
+                SbwNetwork.CHANNEL.sendToServer(new IssueCommandDevicePacket(selectedIds, cancel, mode, x, y, z, px, py, pz));
             }
             this.minecraft.setScreen(null);
         } catch (Exception e) {
@@ -125,8 +135,13 @@ public class CommandDeviceScreen extends Screen {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         int cx = this.width / 2;
         int cy = this.height / 2;
-        guiGraphics.drawString(this.font, "Point A (X, Y, Z)", cx - 110, cy - 75, 0xFFFFFF, true);
-        if (patrolMode) {
+        
+        guiGraphics.drawString(this.font, "Note: List may be incomplete due to unloaded chunks.", cx - 110, cy - 90, 0xFFAA00, false);
+
+        if (mode == 2 || mode == 3) {
+            guiGraphics.drawString(this.font, "Point A (X, Y, Z)", cx - 110, cy - 75, 0xFFFFFF, true);
+        }
+        if (mode == 3) {
             guiGraphics.drawString(this.font, "Point B (X, Y, Z)", cx - 110, cy - 35, 0xFFFFFF, true);
         }
     }

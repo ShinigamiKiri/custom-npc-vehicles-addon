@@ -13,14 +13,14 @@ import java.util.function.Supplier;
 public class IssueCommandDevicePacket {
     private final List<Integer> entityIds;
     private final boolean cancel;
-    private final boolean patrolMode;
+    private final int mode;
     private final double x1, y1, z1;
     private final double x2, y2, z2;
 
-    public IssueCommandDevicePacket(List<Integer> entityIds, boolean cancel, boolean patrolMode, double x1, double y1, double z1, double x2, double y2, double z2) {
+    public IssueCommandDevicePacket(List<Integer> entityIds, boolean cancel, int mode, double x1, double y1, double z1, double x2, double y2, double z2) {
         this.entityIds = entityIds;
         this.cancel = cancel;
-        this.patrolMode = patrolMode;
+        this.mode = mode;
         this.x1 = x1; this.y1 = y1; this.z1 = z1;
         this.x2 = x2; this.y2 = y2; this.z2 = z2;
     }
@@ -32,7 +32,7 @@ public class IssueCommandDevicePacket {
             this.entityIds.add(buf.readInt());
         }
         this.cancel = buf.readBoolean();
-        this.patrolMode = buf.readBoolean();
+        this.mode = buf.readInt();
         this.x1 = buf.readDouble(); this.y1 = buf.readDouble(); this.z1 = buf.readDouble();
         this.x2 = buf.readDouble(); this.y2 = buf.readDouble(); this.z2 = buf.readDouble();
     }
@@ -43,7 +43,7 @@ public class IssueCommandDevicePacket {
             buf.writeInt(id);
         }
         buf.writeBoolean(cancel);
-        buf.writeBoolean(patrolMode);
+        buf.writeInt(mode);
         buf.writeDouble(x1); buf.writeDouble(y1); buf.writeDouble(z1);
         buf.writeDouble(x2); buf.writeDouble(y2); buf.writeDouble(z2);
     }
@@ -53,7 +53,6 @@ public class IssueCommandDevicePacket {
         ctx.enqueueWork(() -> {
             ServerPlayer sender = ctx.getSender();
             if (sender != null) {
-                // Ensure the player is holding the Command Device when issuing the command
                 if (sender.getMainHandItem().getItem() instanceof com.agent.sbwnpcaddon.item.CommandDeviceItem ||
                     sender.getOffhandItem().getItem() instanceof com.agent.sbwnpcaddon.item.CommandDeviceItem) {
                     
@@ -63,7 +62,7 @@ public class IssueCommandDevicePacket {
                             if (cancel) {
                                 com.agent.sbwnpcaddon.entity.ai.CommandDeviceHelper.cancelCommand(mob);
                             } else {
-                                com.agent.sbwnpcaddon.entity.ai.CommandDeviceHelper.applyCommand(mob, patrolMode, x1, y1, z1, x2, y2, z2);
+                                com.agent.sbwnpcaddon.entity.ai.CommandDeviceHelper.applyCommand(mob, mode, x1, y1, z1, x2, y2, z2);
                             }
                         }
                     }
