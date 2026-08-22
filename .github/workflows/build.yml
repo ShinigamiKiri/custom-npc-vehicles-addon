@@ -14,9 +14,11 @@ jobs:
           distribution: 'temurin'
       - name: Build with Gradle
         run: |
-          cd sbw_npc_addon
+          sed -i 's/\r$//' gradlew
           chmod +x gradlew
           ./gradlew build > compile_error.txt 2>&1 || true
+      - name: Commit Error
+        run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           git add compile_error.txt
