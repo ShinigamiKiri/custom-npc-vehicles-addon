@@ -105,7 +105,7 @@ public class SbwNpcAddonMod {
 
     private void onLivingHurt(net.minecraftforge.event.entity.living.LivingHurtEvent event) {
         var entity = event.getEntity();
-        if (!entity.level().isClientSide() && entity instanceof net.minecraft.world.entity.Mob mob) {
+        if (!entity.level().isClientSide && entity instanceof net.minecraft.world.entity.Mob mob) {
             if (mob.getPersistentData().getBoolean("SbwCommandActive")) {
                 int preset = mob.getPersistentData().contains("SbwCombatPreset") ? mob.getPersistentData().getInt("SbwCombatPreset") : 1;
                 if (preset == 3) {
@@ -127,7 +127,7 @@ public class SbwNpcAddonMod {
         // 2. Owner Assist: Follow/Guard mode NPCs assist owner's attacks
         // event.getSource().getEntity() gets the true source (shooter/attacker), handling TACZ and vanilla projectiles
         var sourceEntity = event.getSource().getEntity();
-        if (sourceEntity instanceof net.minecraft.world.entity.player.Player player && !entity.level().isClientSide()) {
+        if (sourceEntity instanceof net.minecraft.world.entity.player.Player player && !entity.level().isClientSide) {
             if (entity instanceof net.minecraft.world.entity.LivingEntity victim && victim.isAlive()) {
                 double assistRadius = 48.0; // Tunable constant for assist range
                 java.util.List<net.minecraft.world.entity.Mob> nearbyMobs = player.level().getEntitiesOfClass(
