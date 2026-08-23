@@ -18,6 +18,14 @@ public class CommandDeviceItem extends Item {
             java.util.List<Integer> ids = new java.util.ArrayList<>();
             java.util.List<String> names = new java.util.ArrayList<>();
             java.util.List<Integer> presets = new java.util.ArrayList<>();
+            java.util.List<Boolean> isCommandActive = new java.util.ArrayList<>();
+            java.util.List<Integer> activeModes = new java.util.ArrayList<>();
+            java.util.List<Double> targetXs = new java.util.ArrayList<>();
+            java.util.List<Double> targetYs = new java.util.ArrayList<>();
+            java.util.List<Double> targetZs = new java.util.ArrayList<>();
+            java.util.List<Double> targetX2s = new java.util.ArrayList<>();
+            java.util.List<Double> targetY2s = new java.util.ArrayList<>();
+            java.util.List<Double> targetZ2s = new java.util.ArrayList<>();
             
             for (net.minecraft.world.entity.Entity e : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, player.getBoundingBox().inflate(64.0))) {
                 try {
@@ -29,8 +37,20 @@ public class CommandDeviceItem extends Item {
                         if (following) {
                             ids.add(e.getId());
                             names.add(e.getDisplayName().getString());
-                            int preset = e.getPersistentData().contains("SbwCombatPreset") ? e.getPersistentData().getInt("SbwCombatPreset") : 1;
+                            net.minecraft.nbt.CompoundTag data = e.getPersistentData();
+                            int preset = data.contains("SbwCombatPreset") ? data.getInt("SbwCombatPreset") : 1;
                             presets.add(preset);
+                            
+                            isCommandActive.add(data.getBoolean("SbwCommandActive"));
+                            int mode = data.contains("SbwCommandMode") ? data.getInt("SbwCommandMode") : (data.getBoolean("SbwCommandPatrol") ? 3 : 2);
+                            activeModes.add(mode);
+                            
+                            targetXs.add(data.getDouble("SbwCmdX1"));
+                            targetYs.add(data.getDouble("SbwCmdY1"));
+                            targetZs.add(data.getDouble("SbwCmdZ1"));
+                            targetX2s.add(data.getDouble("SbwCmdX2"));
+                            targetY2s.add(data.getDouble("SbwCmdY2"));
+                            targetZ2s.add(data.getDouble("SbwCmdZ2"));
                         }
                     }
                 } catch (Exception ex) {
@@ -40,7 +60,7 @@ public class CommandDeviceItem extends Item {
             
             com.agent.sbwnpcaddon.network.SbwNetwork.CHANNEL.send(
                 net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> (net.minecraft.server.level.ServerPlayer) player),
-                new com.agent.sbwnpcaddon.network.OpenCommandDeviceGuiPacket(ids, names, presets)
+                new com.agent.sbwnpcaddon.network.OpenCommandDeviceGuiPacket(ids, names, presets, isCommandActive, activeModes, targetXs, targetYs, targetZs, targetX2s, targetY2s, targetZ2s)
             );
         }
         return InteractionResultHolder.sidedSuccess(player.getItemInHand(hand), level.isClientSide());

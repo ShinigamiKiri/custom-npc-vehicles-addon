@@ -166,9 +166,15 @@ public class SbwCommandGoal extends Goal {
                         followTeleportCooldown = 100;
                     }
                 } else if (distSq > 64.0) {
-                    mob.getNavigation().moveTo(owner, 1.0D);
+                    if (isAircraft()) {
+                        mob.getMoveControl().setWantedPosition(owner.getX(), owner.getY(), owner.getZ(), 1.0D);
+                    } else {
+                        mob.getNavigation().moveTo(owner, 1.0D);
+                    }
                 } else if (distSq < 16.0) {
-                    mob.getNavigation().stop();
+                    if (!isAircraft()) {
+                        mob.getNavigation().stop();
+                    }
                 }
             }
         } else if (mode == 1 || mode == 4) { // Stay / Guard
@@ -178,7 +184,7 @@ public class SbwCommandGoal extends Goal {
             
             if (isPlane) {
                 if (distSq > 900.0) {
-                    mob.getNavigation().moveTo(x1, y1, z1, 1.0D);
+                    mob.getMoveControl().setWantedPosition(x1, y1, z1, 1.0D);
                 } else {
                     mob.getNavigation().stop();
                     if (mob.getMoveControl() instanceof com.agent.sbwnpcaddon.entity.physics.VehicleMoveControl vmc) {
@@ -227,7 +233,11 @@ public class SbwCommandGoal extends Goal {
             double targetX = towardsPointB ? x2 : x1;
             double targetY = towardsPointB ? y2 : y1;
             double targetZ = towardsPointB ? z2 : z1;
-            mob.getNavigation().moveTo(targetX, targetY, targetZ, 1.0D);
+            if (isAircraft()) {
+                mob.getMoveControl().setWantedPosition(targetX, targetY, targetZ, 1.0D);
+            } else {
+                mob.getNavigation().moveTo(targetX, targetY, targetZ, 1.0D);
+            }
         }
     }
 
