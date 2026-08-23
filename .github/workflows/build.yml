@@ -31,6 +31,12 @@ jobs:
     - name: Build with Gradle
       run: gradle build > compile_error.txt 2>&1 || true
 
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbw_npc_addon-jar
+        path: build/libs/*.jar
+
     - name: Commit Error
       run: |
         git config --global user.name "GitHub Action"
