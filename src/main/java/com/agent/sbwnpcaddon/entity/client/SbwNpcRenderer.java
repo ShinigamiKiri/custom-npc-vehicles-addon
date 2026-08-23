@@ -13,4 +13,10 @@ public class SbwNpcRenderer extends GeoEntityRenderer<SbwNpcEntity> {
     public net.minecraft.client.renderer.RenderType getRenderType(SbwNpcEntity animatable, net.minecraft.resources.ResourceLocation texture, net.minecraft.client.renderer.MultiBufferSource bufferSource, float partialTick) {
         return net.minecraft.client.renderer.RenderType.entityCutoutNoCull(texture);
     }
+
+    @Override
+    protected void applyRotations(SbwNpcEntity animatable, com.mojang.blaze3d.vertex.PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
+        super.applyRotations(animatable, poseStack, ageInTicks, rotationYaw, partialTick);
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0f));
+    }
 }

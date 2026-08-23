@@ -311,7 +311,7 @@ public class SbwPhysicsModule {
     
     private void updateEntityRotation(float yaw, float pitch, float roll) {
         this.rotation.identity()
-            .rotateY((float) Math.toRadians(yaw + 180.0f))
+            .rotateY((float) Math.toRadians(yaw))
             .rotateX((float) Math.toRadians(pitch))
             .rotateZ((float) Math.toRadians(roll));
             
