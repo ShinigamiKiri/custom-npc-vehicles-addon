@@ -11,7 +11,7 @@ import java.util.EnumSet;
 public class SbwCommandGoal extends Goal {
     private final Mob mob;
     private boolean active = false;
-    private int mode = 0; // 0: Follow, 1: Stay, 2: Move, 3: Patrol, 4: Guard
+    private int mode = 0; // 0: Follow, 1: Stay, 2: Move, 3: Patrol, 4: Guard, 5: Patrol-Guard
     private double x1, y1, z1;
     private double x2, y2, z2;
     private boolean towardsPointB = false;
@@ -47,6 +47,8 @@ public class SbwCommandGoal extends Goal {
     public void deactivate() {
         this.active = false;
         this.yieldedForCombat = false;
+        mob.getPersistentData().putBoolean("SbwForceOwnerAssist", false);
+        mob.getPersistentData().putBoolean("SbwPrioritizeSelfDefense", false);
         mob.getNavigation().stop();
         if (mob.getMoveControl() instanceof com.agent.sbwnpcaddon.entity.physics.VehicleMoveControl vmc) {
             vmc.forwardIntent = 0.0F;
@@ -55,15 +57,29 @@ public class SbwCommandGoal extends Goal {
     }
 
     private boolean shouldYieldToCombat() {
-        if (mode == 1) return false; // Preset logic doesn't override Stay (mode 1). Stay never yields movement. Wait, Stay = Mode 1, Guard = Mode 4. The user said: "only Stay is intended to not actively pursue/engage". So Stay NEVER yields.
-        
+        if (mode == 1) return false; // Stay mode never yields
+
         LivingEntity target = mob.getTarget();
         if (target == null || !target.isAlive()) return false;
-        
+
+        // Forced assist or self-defense overrides preset logic
+        if (mob.getPersistentData().getBoolean("SbwForceOwnerAssist") || mob.getPersistentData().getBoolean("SbwPrioritizeSelfDefense")) {
+            return true;
+        }
+
         int preset = mob.getPersistentData().contains("SbwCombatPreset") ? mob.getPersistentData().getInt("SbwCombatPreset") : 1;
         
         if (preset == 1) { // Proximity Engage
-            return mob.distanceToSqr(target) <= 100.0; // 10 blocks squared
+            if (mode == 0 || mode == 4 || mode == 5) {
+                // Guard/Patrol-Guard/Follow modes proactively engage any hostile within their native aggro range
+                return true; 
+            } else if (mode == 2) {
+                // Move mode: engage hostiles near destination or current position
+                return mob.distanceToSqr(target) <= 100.0 || target.distanceToSqr(x1, y1, z1) <= 100.0;
+            } else if (mode == 3) {
+                // Patrol mode: engage hostiles near the mob along the path
+                return mob.distanceToSqr(target) <= 100.0;
+            }
         } else if (preset == 2) { // Retaliate on Aggro
             LivingEntity targetOfTarget = null;
             if (target instanceof Mob m) {
@@ -89,12 +105,14 @@ public class SbwCommandGoal extends Goal {
             LivingEntity target = mob.getTarget();
             if (target == null || !target.isAlive()) {
                 yieldedForCombat = false;
+                mob.getPersistentData().putBoolean("SbwForceOwnerAssist", false);
+                mob.getPersistentData().putBoolean("SbwPrioritizeSelfDefense", false);
                 return true; // Target lost/dead, reclaim MOVE
             }
 
             int preset = mob.getPersistentData().contains("SbwCombatPreset") ? mob.getPersistentData().getInt("SbwCombatPreset") : 1;
             
-            if (preset == 1) {
+            if (preset == 1 || mob.getPersistentData().getBoolean("SbwForceOwnerAssist") || mob.getPersistentData().getBoolean("SbwPrioritizeSelfDefense")) {
                 combatTickCounter++;
                 double distMovedSq = mob.distanceToSqr(lastCombatX, lastCombatY, lastCombatZ);
                 if (distMovedSq < 1.0) {
@@ -110,6 +128,8 @@ public class SbwCommandGoal extends Goal {
                     // Forcibly abandon fight
                     mob.setTarget(null); // Clear target so native attack stops
                     yieldedForCombat = false;
+                    mob.getPersistentData().putBoolean("SbwForceOwnerAssist", false);
+                    mob.getPersistentData().putBoolean("SbwPrioritizeSelfDefense", false);
                     return true;
                 }
             } else if (preset == 2) {
@@ -159,7 +179,6 @@ public class SbwCommandGoal extends Goal {
                 double distSq = mob.distanceToSqr(owner);
                 if (followTeleportCooldown > 0) followTeleportCooldown--;
                 
-                // Strictly scope the teleport fallback to ONLY trigger if mode is 0 (Follow)
                 if (this.mode == 0 && (owner.level() != mob.level() || distSq > 40000.0)) {
                     if (followTeleportCooldown <= 0) {
                         mob.teleportTo(owner.getX(), owner.getY(), owner.getZ());
@@ -177,7 +196,16 @@ public class SbwCommandGoal extends Goal {
                     }
                 }
             }
-        } else if (mode == 1 || mode == 4) { // Stay / Guard
+        } else if (mode == 1) { // Stay
+            mob.getNavigation().stop();
+            if (mob.getMoveControl() instanceof com.agent.sbwnpcaddon.entity.physics.VehicleMoveControl vmc) {
+                vmc.forwardIntent = 0.0F;
+                vmc.sideIntent = 0.0F;
+                if (isAircraft()) {
+                    vmc.wantedY = mob.getY() - 10.0; // Force descent to land
+                }
+            }
+        } else if (mode == 4) { // Guard
             double distSq = mob.distanceToSqr(x1, y1, z1);
             int type = mob.getPersistentData().getInt("SbwVehicleType");
             boolean isPlane = (type == 2 || type == 3) && mob.getPersistentData().getInt("SbwAircraftMode") == 1;
@@ -194,12 +222,40 @@ public class SbwCommandGoal extends Goal {
                 }
             } else {
                 if (distSq > 4.0) {
-                    mob.getNavigation().moveTo(x1, y1, z1, 1.0D);
+                    if (isAircraft()) {
+                        mob.getMoveControl().setWantedPosition(x1, y1, z1, 1.0D);
+                    } else {
+                        mob.getNavigation().moveTo(x1, y1, z1, 1.0D);
+                    }
                 } else {
                     mob.getNavigation().stop();
                     if (mob.getMoveControl() instanceof com.agent.sbwnpcaddon.entity.physics.VehicleMoveControl vmc) {
                         vmc.forwardIntent = 0.0F;
                         vmc.sideIntent = 0.0F;
+                    }
+                }
+            }
+        } else if (mode == 5) { // Patrol-Guard
+            Player owner = getOwner();
+            if (owner != null) {
+                double distSq = mob.distanceToSqr(owner);
+                if (distSq > 400.0) { // Outside roam radius, move to player
+                    if (isAircraft()) {
+                        mob.getMoveControl().setWantedPosition(owner.getX(), owner.getY(), owner.getZ(), 1.0D);
+                    } else {
+                        mob.getNavigation().moveTo(owner, 1.0D);
+                    }
+                } else {
+                    // Wander inside radius
+                    if (mob.getNavigation().isDone() || mob.getRandom().nextInt(100) == 0) {
+                        double rx = owner.getX() + (mob.getRandom().nextDouble() - 0.5) * 30.0;
+                        double rz = owner.getZ() + (mob.getRandom().nextDouble() - 0.5) * 30.0;
+                        if (isAircraft()) {
+                            double ry = owner.getY() + 10.0 + (mob.getRandom().nextDouble() - 0.5) * 10.0;
+                            mob.getMoveControl().setWantedPosition(rx, ry, rz, 1.0D);
+                        } else {
+                            mob.getNavigation().moveTo(rx, owner.getY(), rz, 1.0D);
+                        }
                     }
                 }
             }

@@ -37,7 +37,7 @@ public class CommandDeviceScreen extends Screen {
     
     private int tempMode = 0; 
     
-    private String[] modeNames = new String[] {"Follow", "Stay / Guard", "Move", "Patrol"};
+    private String[] modeNames = new String[] {"Follow", "Stay", "Move", "Patrol", "Guard", "Patrol-Guard"};
     private String[] presetNames = new String[] {"", "Preset 1: Proximity", "Preset 2: Retaliate", "Preset 3: Tank"};
 
     public CommandDeviceScreen(List<Integer> ids, List<String> names, List<Integer> presets,
