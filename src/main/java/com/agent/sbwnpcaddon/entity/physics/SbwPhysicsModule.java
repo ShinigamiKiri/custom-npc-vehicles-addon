@@ -221,13 +221,17 @@ public class SbwPhysicsModule {
 
             updateEntityRotation(hullYaw, pitch, roll);
 
-            // Vector forward based on rotation
-            Vector3f forwardVec = new Vector3f(0, 0, 1).rotate(this.rotation);
+            // Vector forward based on rotation using standard Minecraft math
+            float radYaw = (float) Math.toRadians(hullYaw);
+            float radPitch = (float) Math.toRadians(pitch);
+            double fX = -Math.sin(radYaw) * Math.cos(radPitch);
+            double fY = -Math.sin(radPitch);
+            double fZ = Math.cos(radYaw) * Math.cos(radPitch);
             
             // The engine pushes in the forwardVec direction with currentSpeed
-            double targetVelX = forwardVec.x * currentSpeed;
-            double targetVelY = forwardVec.y * currentSpeed; // Engine contributing to Y velocity (climbing/diving)
-            double targetVelZ = forwardVec.z * currentSpeed;
+            double targetVelX = fX * currentSpeed;
+            double targetVelY = fY * currentSpeed; // Engine contributing to Y velocity (climbing/diving)
+            double targetVelZ = fZ * currentSpeed;
             
             // Aerodynamic momentum correction / slip factor
             float aeroBlend = isHoverMode ? 0.9f : 0.05f; // Helis are snappy, planes drift and smoothly blend

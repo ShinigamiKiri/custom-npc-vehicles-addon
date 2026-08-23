@@ -165,15 +165,15 @@ public class SbwCommandGoal extends Goal {
                         mob.teleportTo(owner.getX(), owner.getY(), owner.getZ());
                         followTeleportCooldown = 100;
                     }
-                } else if (distSq > 64.0) {
+                } else {
                     if (isAircraft()) {
                         mob.getMoveControl().setWantedPosition(owner.getX(), owner.getY(), owner.getZ(), 1.0D);
                     } else {
-                        mob.getNavigation().moveTo(owner, 1.0D);
-                    }
-                } else if (distSq < 16.0) {
-                    if (!isAircraft()) {
-                        mob.getNavigation().stop();
+                        if (distSq > 64.0) {
+                            mob.getNavigation().moveTo(owner, 1.0D);
+                        } else if (distSq < 16.0) {
+                            mob.getNavigation().stop();
+                        }
                     }
                 }
             }
