@@ -128,7 +128,7 @@ public class SbwNpcAddonMod {
         // Owner Assist: Follow/Guard/Patrol-Guard mode NPCs assist owner's attacks
         var trueSource = event.getSource().getEntity();
         if (trueSource instanceof net.minecraft.world.entity.player.Player player && !entity.level().isClientSide) {
-            if (entity.isAlive() && entity instanceof net.minecraft.world.entity.LivingEntity targetEntity) {
+            if (entity.isAlive()) {
                 double assistRadius = 48.0; 
                 java.util.List<net.minecraft.world.entity.Mob> nearbyMobs = player.level().getEntitiesOfClass(
                     net.minecraft.world.entity.Mob.class, 
@@ -143,16 +143,16 @@ public class SbwNpcAddonMod {
                                 java.lang.reflect.Method getOwner = assistMob.getClass().getMethod("getOwner");
                                 Object owner = getOwner.invoke(assistMob);
                                 if (owner instanceof net.minecraft.world.entity.Entity o && o.getUUID().equals(player.getUUID())) {
-                                    if (!assistMob.isAlliedTo(targetEntity) && assistMob.canAttack(targetEntity) && targetEntity != assistMob && targetEntity != player) {
+                                    if (!assistMob.isAlliedTo(entity) && assistMob.canAttack(entity) && entity != assistMob && entity != player) {
                                         // Self-defense check
                                         boolean selfDefense = assistMob.getPersistentData().getBoolean("SbwPrioritizeSelfDefense");
-                                        LivingEntity currentTarget = assistMob.getTarget();
-                                        if (selfDefense && currentTarget != null && currentTarget.isAlive() && currentTarget != targetEntity) {
+                                        net.minecraft.world.entity.LivingEntity currentTarget = assistMob.getTarget();
+                                        if (selfDefense && currentTarget != null && currentTarget.isAlive() && currentTarget != entity) {
                                             // Do not override if currently prioritizing self-defense
                                             continue;
                                         }
                                         assistMob.getPersistentData().putBoolean("SbwPrioritizeSelfDefense", false);
-                                        assistMob.setTarget(targetEntity);
+                                        assistMob.setTarget(entity);
                                         assistMob.getPersistentData().putBoolean("SbwForceOwnerAssist", true);
                                     }
                                 }

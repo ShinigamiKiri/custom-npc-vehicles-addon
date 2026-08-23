@@ -1,15 +1,37 @@
-import urllib.request, json, time
+import urllib.request, json, time, sys
 
-req = urllib.request.Request('https://api.github.com/repos/ShinigamiKiri/custom-npc-vehicles-addon/actions/runs')
-req.add_header('User-Agent', 'Mozilla/5.0')
+repo = 'ShinigamiKiri/custom-npc-vehicles-addon'
+runs_url = f'https://api.github.com/repos/{repo}/actions/runs?per_page=1'
 
+def check():
+    req = urllib.request.Request(runs_url)
+    req.add_header('User-Agent', 'Mozilla/5.0')
+    with urllib.request.urlopen(req) as response:
+        data = json.loads(response.read().decode())
+        if not data.get('workflow_runs'):
+            return None
+        return data['workflow_runs'][0]
+
+print("Polling GitHub Actions...")
 while True:
-    response = urllib.request.urlopen(req)
-    data = json.loads(response.read().decode())
-    run = data['workflow_runs'][0]
+    run = check()
+    if not run:
+        print("No runs found.")
+        sys.exit(1)
     status = run.get('status')
     conclusion = run.get('conclusion')
-    print(f'Run ID: {run.get("id")}, Status: {status}, Conclusion: {conclusion}')
+    print(f"Status: {status}, Conclusion: {conclusion}")
     if status == 'completed':
+        if conclusion != 'success':
+            print("Build failed!")
+            sys.exit(1)
         break
     time.sleep(10)
+
+artifacts_url = run.get('artifacts_url')
+req = urllib.request.Request(artifacts_url)
+req.add_header('User-Agent', 'Mozilla/5.0')
+with urllib.request.urlopen(req) as response:
+    data = json.loads(response.read().decode())
+    print("\nArtifact JSON:")
+    print(json.dumps(data, indent=2))
