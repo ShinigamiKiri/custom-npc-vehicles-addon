@@ -1,4 +1,4 @@
-﻿package com.agent.sbwnpcaddon.client.screen;
+package com.agent.sbwnpcaddon.client.screen;
 
 import com.agent.sbwnpcaddon.network.IssueCommandDevicePacket;
 import com.agent.sbwnpcaddon.network.UpdateCombatPresetPacket;

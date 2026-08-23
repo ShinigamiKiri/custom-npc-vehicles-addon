@@ -29,7 +29,7 @@ jobs:
         gradle-version: '8.1.1'
 
     - name: Build with Gradle
-      run: gradle build > compile_error.txt 2>&1 || true
+      run: gradle build
 
     - name: List Build Directory
       run: find build -name "*.jar" > build_tree.txt
