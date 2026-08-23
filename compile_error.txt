@@ -30,7 +30,7 @@ Cannot deobfuscate dependency of type DefaultSelfResolvingDependency_Decorated, 
 ﻿package com.agent.sbwnpcaddon.client.screen;
          ^
 2 errors
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1787472833927.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1787474924339.json
 
 FAILURE: Build failed with an exception.
 
@@ -51,5 +51,5 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 See https://docs.gradle.org/8.1.1/userguide/command_line_interface.html#sec:command_line_warnings
 
-BUILD FAILED in 21s
+BUILD FAILED in 22s
 4 actionable tasks: 4 executed
