@@ -159,7 +159,8 @@ public class SbwCommandGoal extends Goal {
                 double distSq = mob.distanceToSqr(owner);
                 if (followTeleportCooldown > 0) followTeleportCooldown--;
                 
-                if (owner.level() != mob.level() || distSq > 40000.0) {
+                // Strictly scope the teleport fallback to ONLY trigger if mode is 0 (Follow)
+                if (this.mode == 0 && (owner.level() != mob.level() || distSq > 40000.0)) {
                     if (followTeleportCooldown <= 0) {
                         mob.teleportTo(owner.getX(), owner.getY(), owner.getZ());
                         followTeleportCooldown = 100;
