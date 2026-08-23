@@ -22,50 +22,28 @@ Cannot deobfuscate dependency of type DefaultSelfResolvingDependency_Decorated, 
 > Task :extractSrg
 > Task :createMcpToSrg
 
-> Task :compileJava
-Note: SpongePowered MIXIN Annotation Processor Version=0.8.5 (MixinGradle Version=0.7.38)
-Note: Supported obfuscation types: ObfuscationServiceMCP supports [notch] ObfuscationServiceFG3 supports [searge]
-Note: Writing refmap to /home/runner/work/custom-npc-vehicles-addon/custom-npc-vehicles-addon/build/tmp/compileJava/compileJava-refmap.json
-Note: Loading searge mappings from /home/runner/work/custom-npc-vehicles-addon/custom-npc-vehicles-addon/build/createMcpToSrg/output.tsrg
-Note: Writing refmap to /home/runner/work/custom-npc-vehicles-addon/custom-npc-vehicles-addon/build/tmp/compileJava/compileJava-refmap.json
-Note: Writing searge composite mappings to /home/runner/work/custom-npc-vehicles-addon/custom-npc-vehicles-addon/build/tmp/compileJava/compileJava-mappings.tsrg
-Note: Writing refmap to /home/runner/work/custom-npc-vehicles-addon/custom-npc-vehicles-addon/build/tmp/compileJava/compileJava-refmap.json
-Note: Writing refmap to /home/runner/work/custom-npc-vehicles-addon/custom-npc-vehicles-addon/build/tmp/compileJava/compileJava-refmap.json
-Note: Writing searge composite mappings to /home/runner/work/custom-npc-vehicles-addon/custom-npc-vehicles-addon/build/tmp/compileJava/compileJava-mappings.tsrg
-/home/runner/work/custom-npc-vehicles-addon/custom-npc-vehicles-addon/src/main/java/com/agent/sbwnpcaddon/entity/client/SbwNpcModel.java:20: warning: [removal] getTextureResource(T) in GeoModel has been deprecated and marked for removal
-    public ResourceLocation getTextureResource(SbwNpcEntity object) {
-                            ^
-  where T is a type-variable:
-    T extends GeoAnimatable declared in class GeoModel
-/home/runner/work/custom-npc-vehicles-addon/custom-npc-vehicles-addon/src/main/java/com/agent/sbwnpcaddon/entity/client/SbwNpcModel.java:15: warning: [removal] getModelResource(T) in GeoModel has been deprecated and marked for removal
-    public ResourceLocation getModelResource(SbwNpcEntity object) {
-                            ^
-  where T is a type-variable:
-    T extends GeoAnimatable declared in class GeoModel
-Note: /home/runner/work/custom-npc-vehicles-addon/custom-npc-vehicles-addon/src/main/java/com/agent/sbwnpcaddon/block/NpcTradingBlock.java uses or overrides a deprecated API.
-Note: Recompile with -Xlint:deprecation for details.
-Note: /home/runner/work/custom-npc-vehicles-addon/custom-npc-vehicles-addon/src/main/java/com/agent/sbwnpcaddon/entity/ModEntityAttributes.java uses unchecked or unsafe operations.
-Note: Recompile with -Xlint:unchecked for details.
-2 warnings
+> Task :compileJava FAILED
+/home/runner/work/custom-npc-vehicles-addon/custom-npc-vehicles-addon/src/main/java/com/agent/sbwnpcaddon/client/screen/CommandDeviceScreen.java:1: error: illegal character: '\ufeff'
+﻿package com.agent.sbwnpcaddon.client.screen;
+^
+/home/runner/work/custom-npc-vehicles-addon/custom-npc-vehicles-addon/src/main/java/com/agent/sbwnpcaddon/client/screen/CommandDeviceScreen.java:1: error: class, interface, enum, or record expected
+﻿package com.agent.sbwnpcaddon.client.screen;
+         ^
+2 errors
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1787472833927.json
 
-> Task :addMixinsToJar
-> Task :processResources
-> Task :classes
-> Task :jar
-> Task :configureReobfTaskForReobfJar
-> Task :reobfJar
-> Task :configureReobfTaskForReobfJarJar
-> Task :addMixinsToJarJar
-> Task :jarJar SKIPPED
-> Task :reobfJarJar SKIPPED
-> Task :assemble
-> Task :compileTestJava NO-SOURCE
-> Task :processTestResources NO-SOURCE
-> Task :testClasses UP-TO-DATE
-> Task :test NO-SOURCE
-> Task :check UP-TO-DATE
-> Task :build
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1787465614588.json
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler error output for details.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+
+* Get more help at https://help.gradle.org
 
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
 
@@ -73,5 +51,5 @@ You can use '--warning-mode all' to show the individual deprecation warnings and
 
 See https://docs.gradle.org/8.1.1/userguide/command_line_interface.html#sec:command_line_warnings
 
-BUILD SUCCESSFUL in 20s
-11 actionable tasks: 11 executed
+BUILD FAILED in 21s
+4 actionable tasks: 4 executed
