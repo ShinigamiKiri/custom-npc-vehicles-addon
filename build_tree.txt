@@ -1,0 +1,2 @@
+build/reobfJar/output.jar
+build/libs/sbw_npc_addon-1.3.0.jar
