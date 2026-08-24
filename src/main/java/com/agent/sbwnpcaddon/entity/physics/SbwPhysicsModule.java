@@ -319,6 +319,9 @@ public class SbwPhysicsModule {
         entity.yBodyRot = yaw;
         entity.yHeadRot = yaw;
         entity.setXRot(pitch);
+
+        System.out.printf("DEBUG SbwPhysics: Entity=%s yRot=%.2f deltaX=%.4f deltaZ=%.4f currentSpeed=%.4f%n",
+                          entity.getName().getString(), yaw, actualVelX, actualVelZ, currentSpeed);
     }
 
     public Quaternionf getRotation() {
