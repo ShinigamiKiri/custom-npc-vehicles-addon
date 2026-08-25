@@ -41,13 +41,21 @@ public class IvNpcEntity extends PathfinderMob {
             tag.putFloat("SbwTurnRadius", data.getFloat("SbwTurnRadius"));
             tag.putBoolean("SbwPhysicsEnabled", data.getBoolean("SbwPhysicsEnabled"));
         }
+        if (data.contains("SbwAircraftMode")) tag.putInt("SbwAircraftMode", data.getInt("SbwAircraftMode"));
+        if (data.contains("SbwCommandActive")) tag.putBoolean("SbwCommandActive", data.getBoolean("SbwCommandActive"));
+        if (data.contains("SbwCommandMode")) tag.putInt("SbwCommandMode", data.getInt("SbwCommandMode"));
+        if (data.contains("SbwPrioritizeSelfDefense")) tag.putBoolean("SbwPrioritizeSelfDefense", data.getBoolean("SbwPrioritizeSelfDefense"));
+        if (data.contains("SbwForceOwnerAssist")) tag.putBoolean("SbwForceOwnerAssist", data.getBoolean("SbwForceOwnerAssist"));
+        if (data.contains("SbwSeatOffset")) tag.putDouble("SbwSeatOffset", data.getDouble("SbwSeatOffset"));
+        if (data.contains("SbwCommandPatrol")) tag.putBoolean("SbwCommandPatrol", data.getBoolean("SbwCommandPatrol"));
+        if (data.contains("SbwCombatPreset")) tag.putInt("SbwCombatPreset", data.getInt("SbwCombatPreset"));
     }
 
     @Override
     public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        var data = this.getPersistentData();
         if (tag.contains("SbwPhysicsEnabled")) {
-            var data = this.getPersistentData();
             data.putInt("SbwVehicleType", tag.getInt("SbwVehicleType"));
             data.putFloat("SbwMaxSpeed", tag.getFloat("SbwMaxSpeed"));
             data.putFloat("SbwAcceleration", tag.getFloat("SbwAcceleration"));
@@ -55,6 +63,14 @@ public class IvNpcEntity extends PathfinderMob {
             data.putFloat("SbwTurnRadius", tag.getFloat("SbwTurnRadius"));
             data.putBoolean("SbwPhysicsEnabled", tag.getBoolean("SbwPhysicsEnabled"));
         }
+        if (tag.contains("SbwAircraftMode")) data.putInt("SbwAircraftMode", tag.getInt("SbwAircraftMode"));
+        if (tag.contains("SbwCommandActive")) data.putBoolean("SbwCommandActive", tag.getBoolean("SbwCommandActive"));
+        if (tag.contains("SbwCommandMode")) data.putInt("SbwCommandMode", tag.getInt("SbwCommandMode"));
+        if (tag.contains("SbwPrioritizeSelfDefense")) data.putBoolean("SbwPrioritizeSelfDefense", tag.getBoolean("SbwPrioritizeSelfDefense"));
+        if (tag.contains("SbwForceOwnerAssist")) data.putBoolean("SbwForceOwnerAssist", tag.getBoolean("SbwForceOwnerAssist"));
+        if (tag.contains("SbwSeatOffset")) data.putDouble("SbwSeatOffset", tag.getDouble("SbwSeatOffset"));
+        if (tag.contains("SbwCommandPatrol")) data.putBoolean("SbwCommandPatrol", tag.getBoolean("SbwCommandPatrol"));
+        if (tag.contains("SbwCombatPreset")) data.putInt("SbwCombatPreset", tag.getInt("SbwCombatPreset"));
     }
 
     @Override
