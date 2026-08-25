@@ -45,10 +45,11 @@ public class SbwNpcAddonMod {
                 float tr = target.getPersistentData().contains("SbwTurnRadius") ? target.getPersistentData().getFloat("SbwTurnRadius") : 1.0f;
                 int am = target.getPersistentData().contains("SbwAircraftMode") ? target.getPersistentData().getInt("SbwAircraftMode") : ((type == 3) ? 0 : 1);
                 boolean phys = target.getPersistentData().getBoolean("SbwPhysicsEnabled");
+                float yo = target.getPersistentData().getFloat("SbwModelYawOffset");
 
                 com.agent.sbwnpcaddon.network.SbwNetwork.CHANNEL.send(
                     net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> (net.minecraft.server.level.ServerPlayer) event.getEntity()),
-                    new com.agent.sbwnpcaddon.network.SyncVehicleConfigPacket(target.getId(), type, ms, acc, brk, tr, am, phys)
+                    new com.agent.sbwnpcaddon.network.SyncVehicleConfigPacket(target.getId(), type, ms, acc, brk, tr, am, phys, yo)
                 );
             }
             event.setCanceled(true);
@@ -66,10 +67,11 @@ public class SbwNpcAddonMod {
                 float tr = target.getPersistentData().contains("SbwTurnRadius") ? target.getPersistentData().getFloat("SbwTurnRadius") : 1.0f;
                 int am = target.getPersistentData().contains("SbwAircraftMode") ? target.getPersistentData().getInt("SbwAircraftMode") : ((type == 3) ? 0 : 1);
                 boolean phys = target.getPersistentData().getBoolean("SbwPhysicsEnabled");
+                float yo = target.getPersistentData().getFloat("SbwModelYawOffset");
 
                 com.agent.sbwnpcaddon.network.SbwNetwork.CHANNEL.send(
                     net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> (net.minecraft.server.level.ServerPlayer) event.getEntity()),
-                    new com.agent.sbwnpcaddon.network.SyncVehicleConfigPacket(target.getId(), type, ms, acc, brk, tr, am, phys)
+                    new com.agent.sbwnpcaddon.network.SyncVehicleConfigPacket(target.getId(), type, ms, acc, brk, tr, am, phys, yo)
                 );
             }
             event.setCanceled(true);

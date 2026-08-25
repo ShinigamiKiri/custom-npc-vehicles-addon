@@ -16,9 +16,10 @@ public class SbwNpcRenderer extends GeoEntityRenderer<SbwNpcEntity> {
 
     @Override
     protected void applyRotations(SbwNpcEntity animatable, com.mojang.blaze3d.vertex.PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTick) {
-        System.out.println("DEBUG SbwNpcRenderer: Entity=" + animatable.getName().getString() + " Type=" + animatable.getType().getDescriptionId() + " rotationYaw=" + rotationYaw);
         super.applyRotations(animatable, poseStack, ageInTicks, rotationYaw, partialTick);
-        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(180.0f));
-        System.out.println("DEBUG SbwNpcRenderer: Applied 180 YP rotation");
+        float offset = animatable.getPersistentData().getFloat("SbwModelYawOffset");
+        if (offset != 0.0f) {
+            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(offset));
+        }
     }
 }

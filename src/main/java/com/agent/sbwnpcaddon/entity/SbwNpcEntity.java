@@ -58,6 +58,7 @@ public class SbwNpcEntity extends PathfinderMob implements GeoEntity {
         if (data.contains("SbwSeatOffset")) tag.putDouble("SbwSeatOffset", data.getDouble("SbwSeatOffset"));
         if (data.contains("SbwCommandPatrol")) tag.putBoolean("SbwCommandPatrol", data.getBoolean("SbwCommandPatrol"));
         if (data.contains("SbwCombatPreset")) tag.putInt("SbwCombatPreset", data.getInt("SbwCombatPreset"));
+        if (data.contains("SbwModelYawOffset")) tag.putFloat("SbwModelYawOffset", data.getFloat("SbwModelYawOffset"));
     }
 
     @Override
@@ -80,6 +81,7 @@ public class SbwNpcEntity extends PathfinderMob implements GeoEntity {
         if (tag.contains("SbwSeatOffset")) data.putDouble("SbwSeatOffset", tag.getDouble("SbwSeatOffset"));
         if (tag.contains("SbwCommandPatrol")) data.putBoolean("SbwCommandPatrol", tag.getBoolean("SbwCommandPatrol"));
         if (tag.contains("SbwCombatPreset")) data.putInt("SbwCombatPreset", tag.getInt("SbwCombatPreset"));
+        if (tag.contains("SbwModelYawOffset")) data.putFloat("SbwModelYawOffset", tag.getFloat("SbwModelYawOffset"));
     }
 
     @Override

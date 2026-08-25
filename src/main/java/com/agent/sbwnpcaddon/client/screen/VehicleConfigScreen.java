@@ -20,6 +20,7 @@ public class VehicleConfigScreen extends Screen {
     private EditBox turnRadBox;
     private boolean physicsEnabled;
     private Button aircraftModeButton;
+    private float modelYawOffset;
 
     public VehicleConfigScreen(LivingEntity entity) {
         super(Component.literal("Vehicle Configuration"));
@@ -31,11 +32,8 @@ public class VehicleConfigScreen extends Screen {
         } else {
             this.aircraftMode = (type == 3) ? 0 : 1;
         }
-        float ms = entity.getPersistentData().contains("SbwMaxSpeed") ? entity.getPersistentData().getFloat("SbwMaxSpeed") : 0.5f;
-        float acc = entity.getPersistentData().contains("SbwAcceleration") ? entity.getPersistentData().getFloat("SbwAcceleration") : 0.005f;
-        float brk = entity.getPersistentData().contains("SbwBraking") ? entity.getPersistentData().getFloat("SbwBraking") : 0.02f;
-        float tr = entity.getPersistentData().contains("SbwTurnRadius") ? entity.getPersistentData().getFloat("SbwTurnRadius") : 1.0f;
         this.physicsEnabled = entity.getPersistentData().getBoolean("SbwPhysicsEnabled");
+        this.modelYawOffset = entity.getPersistentData().getFloat("SbwModelYawOffset");
     }
 
     @Override
@@ -88,6 +86,12 @@ public class VehicleConfigScreen extends Screen {
         this.addRenderableWidget(Button.builder(Component.literal("Physics: " + (physicsEnabled ? "ON" : "OFF")), b -> {
             physicsEnabled = !physicsEnabled;
             b.setMessage(Component.literal("Physics: " + (physicsEnabled ? "ON" : "OFF")));
+        }).bounds(cx - 155, cy + 40, 100, 20).build());
+
+        // Model Yaw Offset
+        this.addRenderableWidget(Button.builder(Component.literal("Model Yaw: " + (int)modelYawOffset), b -> {
+            modelYawOffset = (modelYawOffset + 90) % 360;
+            b.setMessage(Component.literal("Model Yaw: " + (int)modelYawOffset));
         }).bounds(cx - 50, cy + 40, 100, 20).build());
         
         // Save (Current entity only)
@@ -112,7 +116,7 @@ public class VehicleConfigScreen extends Screen {
             float acc = Float.parseFloat(accelBox.getValue());
             float brk = Float.parseFloat(brakeBox.getValue());
             float tr = Float.parseFloat(turnRadBox.getValue());
-            SbwNetwork.CHANNEL.sendToServer(new SaveVehicleConfigPacket(entity.getId(), type, ms, acc, brk, tr, aircraftMode, physicsEnabled, applyToAll));
+            SbwNetwork.CHANNEL.sendToServer(new SaveVehicleConfigPacket(entity.getId(), type, ms, acc, brk, tr, aircraftMode, physicsEnabled, modelYawOffset, applyToAll));
             this.minecraft.setScreen(null);
         } catch (Exception e) {
             // validation failed, don't save

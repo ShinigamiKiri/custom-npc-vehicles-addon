@@ -20,9 +20,10 @@ public class SaveVehicleConfigPacket {
     private final float turnRadius;
     private final int aircraftMode;
     private final boolean physicsEnabled;
+    private final float modelYawOffset;
     private final boolean applyToAllClones;
 
-    public SaveVehicleConfigPacket(int entityId, int type, float maxSpeed, float acceleration, float braking, float turnRadius, int aircraftMode, boolean physicsEnabled, boolean applyToAllClones) {
+    public SaveVehicleConfigPacket(int entityId, int type, float maxSpeed, float acceleration, float braking, float turnRadius, int aircraftMode, boolean physicsEnabled, float modelYawOffset, boolean applyToAllClones) {
         this.entityId = entityId;
         this.type = type;
         this.maxSpeed = maxSpeed;
@@ -31,6 +32,7 @@ public class SaveVehicleConfigPacket {
         this.turnRadius = turnRadius;
         this.aircraftMode = aircraftMode;
         this.physicsEnabled = physicsEnabled;
+        this.modelYawOffset = modelYawOffset;
         this.applyToAllClones = applyToAllClones;
     }
 
@@ -43,6 +45,7 @@ public class SaveVehicleConfigPacket {
         this.turnRadius = buf.readFloat();
         this.aircraftMode = buf.readInt();
         this.physicsEnabled = buf.readBoolean();
+        this.modelYawOffset = buf.readFloat();
         this.applyToAllClones = buf.readBoolean();
     }
 
@@ -55,6 +58,7 @@ public class SaveVehicleConfigPacket {
         buf.writeFloat(turnRadius);
         buf.writeInt(aircraftMode);
         buf.writeBoolean(physicsEnabled);
+        buf.writeFloat(modelYawOffset);
         buf.writeBoolean(applyToAllClones);
     }
 
@@ -102,6 +106,7 @@ public class SaveVehicleConfigPacket {
         mob.getPersistentData().putFloat("SbwTurnRadius", turnRadius);
         mob.getPersistentData().putInt("SbwAircraftMode", aircraftMode);
         mob.getPersistentData().putBoolean("SbwPhysicsEnabled", physicsEnabled);
+        mob.getPersistentData().putFloat("SbwModelYawOffset", modelYawOffset);
 
         if (physicsEnabled) {
             VehicleConfigTool.physicsModules.put(mob, new SbwPhysicsModule(mob));

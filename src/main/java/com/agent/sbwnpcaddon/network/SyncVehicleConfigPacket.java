@@ -18,8 +18,9 @@ public class SyncVehicleConfigPacket {
     private final float turnRadius;
     private final int aircraftMode;
     private final boolean physicsEnabled;
+    private final float modelYawOffset;
 
-    public SyncVehicleConfigPacket(int entityId, int type, float maxSpeed, float acceleration, float braking, float turnRadius, int aircraftMode, boolean physicsEnabled) {
+    public SyncVehicleConfigPacket(int entityId, int type, float maxSpeed, float acceleration, float braking, float turnRadius, int aircraftMode, boolean physicsEnabled, float modelYawOffset) {
         this.entityId = entityId;
         this.type = type;
         this.maxSpeed = maxSpeed;
@@ -28,6 +29,7 @@ public class SyncVehicleConfigPacket {
         this.turnRadius = turnRadius;
         this.aircraftMode = aircraftMode;
         this.physicsEnabled = physicsEnabled;
+        this.modelYawOffset = modelYawOffset;
     }
 
     public SyncVehicleConfigPacket(FriendlyByteBuf buf) {
@@ -39,6 +41,7 @@ public class SyncVehicleConfigPacket {
         this.turnRadius = buf.readFloat();
         this.aircraftMode = buf.readInt();
         this.physicsEnabled = buf.readBoolean();
+        this.modelYawOffset = buf.readFloat();
     }
 
     public void toBytes(FriendlyByteBuf buf) {
@@ -50,6 +53,7 @@ public class SyncVehicleConfigPacket {
         buf.writeFloat(turnRadius);
         buf.writeInt(aircraftMode);
         buf.writeBoolean(physicsEnabled);
+        buf.writeFloat(modelYawOffset);
     }
 
     public boolean handle(Supplier<NetworkEvent.Context> supplier) {
@@ -66,6 +70,7 @@ public class SyncVehicleConfigPacket {
                     living.getPersistentData().putFloat("SbwTurnRadius", turnRadius);
                     living.getPersistentData().putInt("SbwAircraftMode", aircraftMode);
                     living.getPersistentData().putBoolean("SbwPhysicsEnabled", physicsEnabled);
+                    living.getPersistentData().putFloat("SbwModelYawOffset", modelYawOffset);
                     
                     net.minecraft.client.Minecraft.getInstance().setScreen(new com.agent.sbwnpcaddon.client.screen.VehicleConfigScreen(living));
                 }

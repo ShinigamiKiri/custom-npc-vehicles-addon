@@ -82,7 +82,8 @@ public class IvNpcRenderer extends EntityRenderer<IvNpcEntity> {
         poseStack.scale(1.0F, 1.0F, 1.0F); 
         
         // Entity rotation
-        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-entityYaw + 180));
+        float offset = entity.getPersistentData().getFloat("SbwModelYawOffset");
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-entityYaw + 180 + offset));
         
         ResourceLocation texture = getTextureLocation(entity);
         VertexConsumer vertexConsumer = buffer.getBuffer(RenderType.entityCutoutNoCull(texture));
