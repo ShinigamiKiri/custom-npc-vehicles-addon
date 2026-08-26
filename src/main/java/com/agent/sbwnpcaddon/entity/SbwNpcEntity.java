@@ -59,6 +59,8 @@ public class SbwNpcEntity extends PathfinderMob implements GeoEntity {
         if (data.contains("SbwCommandPatrol")) tag.putBoolean("SbwCommandPatrol", data.getBoolean("SbwCommandPatrol"));
         if (data.contains("SbwCombatPreset")) tag.putInt("SbwCombatPreset", data.getInt("SbwCombatPreset"));
         if (data.contains("SbwModelYawOffset")) tag.putFloat("SbwModelYawOffset", data.getFloat("SbwModelYawOffset"));
+        if (data.contains("SbwProjectileLoadout")) tag.put("SbwProjectileLoadout", data.getList("SbwProjectileLoadout", 10));
+        if (data.contains("SbwActiveProjectileIndex")) tag.putInt("SbwActiveProjectileIndex", data.getInt("SbwActiveProjectileIndex"));
     }
 
     @Override
@@ -82,6 +84,8 @@ public class SbwNpcEntity extends PathfinderMob implements GeoEntity {
         if (tag.contains("SbwCommandPatrol")) data.putBoolean("SbwCommandPatrol", tag.getBoolean("SbwCommandPatrol"));
         if (tag.contains("SbwCombatPreset")) data.putInt("SbwCombatPreset", tag.getInt("SbwCombatPreset"));
         if (tag.contains("SbwModelYawOffset")) data.putFloat("SbwModelYawOffset", tag.getFloat("SbwModelYawOffset"));
+        if (tag.contains("SbwProjectileLoadout")) data.put("SbwProjectileLoadout", tag.getList("SbwProjectileLoadout", 10));
+        if (tag.contains("SbwActiveProjectileIndex")) data.putInt("SbwActiveProjectileIndex", tag.getInt("SbwActiveProjectileIndex"));
     }
 
     @Override

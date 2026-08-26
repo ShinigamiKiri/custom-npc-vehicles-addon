@@ -2,6 +2,7 @@ package com.agent.sbwnpcaddon.client.screen;
 
 import com.agent.sbwnpcaddon.network.IssueCommandDevicePacket;
 import com.agent.sbwnpcaddon.network.UpdateCombatPresetPacket;
+import com.agent.sbwnpcaddon.network.UpdateActiveProjectilePacket;
 import com.agent.sbwnpcaddon.network.SbwNetwork;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -20,6 +21,8 @@ public class CommandDeviceScreen extends Screen {
     private final List<Integer> activeModes;
     private final List<Double> targetXs, targetYs, targetZs;
     private final List<Double> targetX2s, targetY2s, targetZ2s;
+    private final List<String> projectileLoadoutNames;
+    private final List<Integer> activeProjectileIndices;
     
     private final List<Boolean> selected;
 
@@ -43,7 +46,8 @@ public class CommandDeviceScreen extends Screen {
     public CommandDeviceScreen(List<Integer> ids, List<String> names, List<Integer> presets,
                                List<Boolean> isCommandActive, List<Integer> activeModes,
                                List<Double> targetXs, List<Double> targetYs, List<Double> targetZs,
-                               List<Double> targetX2s, List<Double> targetY2s, List<Double> targetZ2s) {
+                               List<Double> targetX2s, List<Double> targetY2s, List<Double> targetZ2s,
+                               List<String> projectileLoadoutNames, List<Integer> activeProjectileIndices) {
         super(Component.literal("Command Device"));
         this.ids = ids;
         this.names = names;
@@ -52,6 +56,8 @@ public class CommandDeviceScreen extends Screen {
         this.activeModes = activeModes;
         this.targetXs = targetXs; this.targetYs = targetYs; this.targetZs = targetZs;
         this.targetX2s = targetX2s; this.targetY2s = targetY2s; this.targetZ2s = targetZ2s;
+        this.projectileLoadoutNames = projectileLoadoutNames;
+        this.activeProjectileIndices = activeProjectileIndices;
         
         this.selected = new ArrayList<>();
         for (int i = 0; i < ids.size(); i++) {
@@ -134,7 +140,25 @@ public class CommandDeviceScreen extends Screen {
                     presets.set(editingIndex, current);
                     b.setMessage(Component.literal(presetNames[current]));
                     SbwNetwork.CHANNEL.sendToServer(new UpdateCombatPresetPacket(ids.get(editingIndex), current));
-                }).bounds(cx - 65, cy + 40, 130, 20).build());
+                }).bounds(cx - 100, cy + 40, 130, 20).build());
+                
+                String pNamesStr = projectileLoadoutNames.get(editingIndex);
+                if (pNamesStr != null && !pNamesStr.isEmpty()) {
+                    String[] pNames = pNamesStr.split(",");
+                    int initialProjIndex = activeProjectileIndices.get(editingIndex);
+                    if (initialProjIndex < 0 || initialProjIndex >= pNames.length) initialProjIndex = 0;
+                    
+                    String displayStr = "Proj: " + pNames[initialProjIndex];
+                    this.addRenderableWidget(Button.builder(Component.literal(displayStr), b -> {
+                        int pIdx = activeProjectileIndices.get(editingIndex);
+                        pIdx = (pIdx + 1) % pNames.length;
+                        activeProjectileIndices.set(editingIndex, pIdx);
+                        b.setMessage(Component.literal("Proj: " + pNames[pIdx]));
+                        SbwNetwork.CHANNEL.sendToServer(new UpdateActiveProjectilePacket(ids.get(editingIndex), pIdx));
+                    }).bounds(cx + 40, cy + 40, 90, 20).build());
+                } else {
+                    this.addRenderableWidget(Button.builder(Component.literal("No Proj Loadout"), b -> {}).bounds(cx + 40, cy + 40, 90, 20).build()).active = false;
+                }
             }
 
             this.addRenderableWidget(Button.builder(Component.literal("Execute"), b -> {
@@ -239,3 +263,4 @@ public class CommandDeviceScreen extends Screen {
         return false;
     }
 }
+

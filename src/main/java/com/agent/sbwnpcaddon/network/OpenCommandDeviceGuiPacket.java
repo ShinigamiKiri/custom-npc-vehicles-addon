@@ -17,11 +17,15 @@ public class OpenCommandDeviceGuiPacket {
     private final List<Integer> activeModes;
     private final List<Double> targetXs, targetYs, targetZs;
     private final List<Double> targetX2s, targetY2s, targetZ2s;
+    
+    private final List<String> projectileLoadoutNames;
+    private final List<Integer> activeProjectileIndices;
 
     public OpenCommandDeviceGuiPacket(List<Integer> entityIds, List<String> entityNames, List<Integer> presets,
                                       List<Boolean> isCommandActive, List<Integer> activeModes,
                                       List<Double> targetXs, List<Double> targetYs, List<Double> targetZs,
-                                      List<Double> targetX2s, List<Double> targetY2s, List<Double> targetZ2s) {
+                                      List<Double> targetX2s, List<Double> targetY2s, List<Double> targetZ2s,
+                                      List<String> projectileLoadoutNames, List<Integer> activeProjectileIndices) {
         this.entityIds = entityIds;
         this.entityNames = entityNames;
         this.presets = presets;
@@ -29,6 +33,8 @@ public class OpenCommandDeviceGuiPacket {
         this.activeModes = activeModes;
         this.targetXs = targetXs; this.targetYs = targetYs; this.targetZs = targetZs;
         this.targetX2s = targetX2s; this.targetY2s = targetY2s; this.targetZ2s = targetZ2s;
+        this.projectileLoadoutNames = projectileLoadoutNames;
+        this.activeProjectileIndices = activeProjectileIndices;
     }
 
     public OpenCommandDeviceGuiPacket(FriendlyByteBuf buf) {
@@ -40,6 +46,8 @@ public class OpenCommandDeviceGuiPacket {
         this.activeModes = new ArrayList<>();
         this.targetXs = new ArrayList<>(); this.targetYs = new ArrayList<>(); this.targetZs = new ArrayList<>();
         this.targetX2s = new ArrayList<>(); this.targetY2s = new ArrayList<>(); this.targetZ2s = new ArrayList<>();
+        this.projectileLoadoutNames = new ArrayList<>();
+        this.activeProjectileIndices = new ArrayList<>();
         
         for (int i = 0; i < size; i++) {
             this.entityIds.add(buf.readInt());
@@ -49,6 +57,8 @@ public class OpenCommandDeviceGuiPacket {
             this.activeModes.add(buf.readInt());
             this.targetXs.add(buf.readDouble()); this.targetYs.add(buf.readDouble()); this.targetZs.add(buf.readDouble());
             this.targetX2s.add(buf.readDouble()); this.targetY2s.add(buf.readDouble()); this.targetZ2s.add(buf.readDouble());
+            this.projectileLoadoutNames.add(buf.readUtf(32767));
+            this.activeProjectileIndices.add(buf.readInt());
         }
     }
 
@@ -62,6 +72,8 @@ public class OpenCommandDeviceGuiPacket {
             buf.writeInt(activeModes.get(i));
             buf.writeDouble(targetXs.get(i)); buf.writeDouble(targetYs.get(i)); buf.writeDouble(targetZs.get(i));
             buf.writeDouble(targetX2s.get(i)); buf.writeDouble(targetY2s.get(i)); buf.writeDouble(targetZ2s.get(i));
+            buf.writeUtf(projectileLoadoutNames.get(i));
+            buf.writeInt(activeProjectileIndices.get(i));
         }
     }
 
@@ -69,10 +81,11 @@ public class OpenCommandDeviceGuiPacket {
         NetworkEvent.Context ctx = supplier.get();
         ctx.enqueueWork(() -> {
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-                com.agent.sbwnpcaddon.client.ClientHelper.openCommandDeviceScreen(entityIds, entityNames, presets, isCommandActive, activeModes, targetXs, targetYs, targetZs, targetX2s, targetY2s, targetZ2s);
+                com.agent.sbwnpcaddon.client.ClientHelper.openCommandDeviceScreen(entityIds, entityNames, presets, isCommandActive, activeModes, targetXs, targetYs, targetZs, targetX2s, targetY2s, targetZ2s, projectileLoadoutNames, activeProjectileIndices);
             });
         });
         ctx.setPacketHandled(true);
         return true;
     }
 }
+

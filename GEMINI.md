@@ -21,6 +21,8 @@ Before implementing any new feature or fix in this project, you must read this r
    - `SbwCommandPatrol`
    - `SbwCombatPreset`
    - `SbwModelYawOffset`
+   - `SbwProjectileLoadout` (ListTag of projectile setups)
+   - `SbwActiveProjectileIndex` (Int index into the loadout)
 
 2. **Physics Authority**: `SbwPhysicsModule` and `SbwCommandGoal` must remain the single sole authority over `yRot`, `yBodyRot`, `yHeadRot`, and movement velocity for physics-enabled vehicles. No other goal or vanilla system may write to these properties.
 

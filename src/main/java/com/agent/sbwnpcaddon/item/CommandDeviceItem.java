@@ -26,6 +26,8 @@ public class CommandDeviceItem extends Item {
             java.util.List<Double> targetX2s = new java.util.ArrayList<>();
             java.util.List<Double> targetY2s = new java.util.ArrayList<>();
             java.util.List<Double> targetZ2s = new java.util.ArrayList<>();
+            java.util.List<String> projectileLoadoutNames = new java.util.ArrayList<>();
+            java.util.List<Integer> activeProjectileIndices = new java.util.ArrayList<>();
             
             for (net.minecraft.world.entity.Entity e : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, player.getBoundingBox().inflate(64.0))) {
                 try {
@@ -51,6 +53,20 @@ public class CommandDeviceItem extends Item {
                             targetX2s.add(data.getDouble("SbwCmdX2"));
                             targetY2s.add(data.getDouble("SbwCmdY2"));
                             targetZ2s.add(data.getDouble("SbwCmdZ2"));
+                            
+                            activeProjectileIndices.add(data.getInt("SbwActiveProjectileIndex"));
+                            
+                            if (data.contains("SbwProjectileLoadout")) {
+                                net.minecraft.nbt.ListTag loadout = data.getList("SbwProjectileLoadout", 10);
+                                StringBuilder sb = new StringBuilder();
+                                for (int i = 0; i < loadout.size(); i++) {
+                                    if (i > 0) sb.append(",");
+                                    sb.append(loadout.getCompound(i).getString("Name"));
+                                }
+                                projectileLoadoutNames.add(sb.toString());
+                            } else {
+                                projectileLoadoutNames.add("");
+                            }
                         }
                     }
                 } catch (Exception ex) {
@@ -60,7 +76,7 @@ public class CommandDeviceItem extends Item {
             
             com.agent.sbwnpcaddon.network.SbwNetwork.CHANNEL.send(
                 net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> (net.minecraft.server.level.ServerPlayer) player),
-                new com.agent.sbwnpcaddon.network.OpenCommandDeviceGuiPacket(ids, names, presets, isCommandActive, activeModes, targetXs, targetYs, targetZs, targetX2s, targetY2s, targetZ2s)
+                new com.agent.sbwnpcaddon.network.OpenCommandDeviceGuiPacket(ids, names, presets, isCommandActive, activeModes, targetXs, targetYs, targetZs, targetX2s, targetY2s, targetZ2s, projectileLoadoutNames, activeProjectileIndices)
             );
         }
         return InteractionResultHolder.sidedSuccess(player.getItemInHand(hand), level.isClientSide());

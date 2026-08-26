@@ -108,6 +108,11 @@ public class VehicleConfigScreen extends Screen {
         this.addRenderableWidget(Button.builder(Component.literal("Cancel/Close"), b -> {
             this.minecraft.setScreen(null);
         }).bounds(cx + 55, cy + 65, 100, 20).build());
+
+        // Projectile Loadout
+        this.addRenderableWidget(Button.builder(Component.literal("Projectile Loadout"), b -> {
+            this.minecraft.setScreen(new ProjectileLoadoutScreen(this.entity, this));
+        }).bounds(cx - 50, cy - 85, 100, 20).build());
     }
     
     private void save(boolean applyToAll) {

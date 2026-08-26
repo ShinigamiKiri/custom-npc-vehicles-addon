@@ -21,5 +21,7 @@ public class SbwNetwork {
         CHANNEL.registerMessage(id++, IssueCommandDevicePacket.class, IssueCommandDevicePacket::toBytes, IssueCommandDevicePacket::new, IssueCommandDevicePacket::handle);
         CHANNEL.registerMessage(id++, TradeCompletePacket.class, TradeCompletePacket::toBytes, TradeCompletePacket::new, TradeCompletePacket::handle);
         CHANNEL.registerMessage(id++, UpdateCombatPresetPacket.class, UpdateCombatPresetPacket::toBytes, UpdateCombatPresetPacket::new, UpdateCombatPresetPacket::handle);
+        CHANNEL.registerMessage(id++, SaveProjectileLoadoutPacket.class, SaveProjectileLoadoutPacket::toBytes, SaveProjectileLoadoutPacket::new, SaveProjectileLoadoutPacket::handle);
+        CHANNEL.registerMessage(id++, UpdateActiveProjectilePacket.class, UpdateActiveProjectilePacket::toBytes, UpdateActiveProjectilePacket::new, UpdateActiveProjectilePacket::handle);
     }
 }

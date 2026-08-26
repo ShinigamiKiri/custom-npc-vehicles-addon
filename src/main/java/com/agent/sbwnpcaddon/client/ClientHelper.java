@@ -1,13 +1,17 @@
 package com.agent.sbwnpcaddon.client;
 
+import com.agent.sbwnpcaddon.client.screen.CommandDeviceScreen;
 import net.minecraft.client.Minecraft;
 import java.util.List;
 
 public class ClientHelper {
-    public static void openCommandDeviceScreen(java.util.List<Integer> ids, java.util.List<String> names, java.util.List<Integer> presets,
-                                               java.util.List<Boolean> isCommandActive, java.util.List<Integer> activeModes,
-                                               java.util.List<Double> targetXs, java.util.List<Double> targetYs, java.util.List<Double> targetZs,
-                                               java.util.List<Double> targetX2s, java.util.List<Double> targetY2s, java.util.List<Double> targetZ2s) {
-        Minecraft.getInstance().setScreen(new com.agent.sbwnpcaddon.client.screen.CommandDeviceScreen(ids, names, presets, isCommandActive, activeModes, targetXs, targetYs, targetZs, targetX2s, targetY2s, targetZ2s));
+    public static void openCommandDeviceScreen(List<Integer> ids, List<String> names, List<Integer> presets,
+                                               List<Boolean> isCommandActive, List<Integer> activeModes,
+                                               List<Double> targetXs, List<Double> targetYs, List<Double> targetZs,
+                                               List<Double> targetX2s, List<Double> targetY2s, List<Double> targetZ2s,
+                                               List<String> projectileLoadoutNames, List<Integer> activeProjectileIndices) {
+        Minecraft.getInstance().setScreen(new CommandDeviceScreen(ids, names, presets, isCommandActive, activeModes,
+                targetXs, targetYs, targetZs, targetX2s, targetY2s, targetZ2s, projectileLoadoutNames, activeProjectileIndices));
     }
 }
+
